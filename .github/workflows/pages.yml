@@ -1,0 +1,60 @@
+name: Deploy joining instructions to GitHub Pages
+
+on:
+  push:
+    branches: ["claude/desaru-joining-instructions-x7g4e4"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two deploys at once, and let an in-flight deploy finish rather
+# than cancelling it half way.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Configure Pages
+        # enablement: true creates the Pages site via the API on the first run,
+        # so this does not need Pages switching on by hand beforehand.
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+
+      - name: Assemble the published site
+        # Publish the page and its images ONLY. README.md is deliberately left
+        # out: it lists unresolved blockers and internal committee notes, and a
+        # static deploy would otherwise serve it at /README.md.
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site
+          cp index.html _site/
+          if [ -d img ]; then
+            cp -r img _site/img
+            rm -f _site/img/README.md
+          fi
+          touch _site/.nojekyll
+          echo "Publishing:"
+          find _site -type f | sort
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
