@@ -34,9 +34,10 @@ jobs:
           enablement: true
 
       - name: Assemble the published site
-        # Publish the page and its images ONLY. README.md is deliberately left
-        # out: it lists unresolved blockers and internal committee notes, and a
-        # static deploy would otherwise serve it at /README.md.
+        # Publish the page, its images and the hero video ONLY. README.md is
+        # deliberately left out: it lists unresolved blockers and internal
+        # committee notes, and a static deploy would otherwise serve it at
+        # /README.md.
         run: |
           set -euo pipefail
           rm -rf _site
@@ -46,9 +47,15 @@ jobs:
             cp -r img _site/img
             rm -f _site/img/README.md
           fi
+          if [ -d media ]; then
+            cp -r media _site/media
+            rm -f _site/media/README.md
+          fi
           touch _site/.nojekyll
+          # Fail loudly rather than shipping a hero that 404s.
+          test -f _site/media/hero.mp4 || { echo "::error::media/hero.mp4 missing from the payload"; exit 1; }
           echo "Publishing:"
-          find _site -type f | sort
+          find _site -type f -exec du -h {} + | sort -k2
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

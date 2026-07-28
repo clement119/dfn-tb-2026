@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>UFR Team Building · Desaru · 12-14 Aug 2026</title>
-<meta name="description" content="Joining instructions for the UFR Team Building at Sand &amp; Sandals Desaru, 12 to 14 August 2026.">
+<title>Development Finance Teambuilding 2026 · Desaru · 12-14 Aug</title>
+<meta name="description" content="Joining instructions for Development Finance Teambuilding 2026 at Sand &amp; Sandals Desaru, 12 to 14 August 2026.">
 
 <!-- Confidential internal document. Do not index, do not unfurl in link previews. -->
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
@@ -73,6 +73,11 @@
     --t-body:    clamp(1rem, 1.6vw, 1.125rem);
     --t-mono:    0.875rem;
     --t-eyebrow: 0.75rem;
+
+    /* How much scrolling the timelapse is stretched across. The first 100dvh
+       is the hero at rest, the remainder is the scrub. Kept shorter on phones
+       so reaching the agenda is not a chore. */
+    --hero-track: 260vh;
 
     /* --- rhythm --- */
     --gutter: clamp(1.25rem, 5vw, 4.5rem);
@@ -201,26 +206,43 @@
  * ============================================================ */
 @layer components {
 
-  /* ---------- hero ---------- */
+  /* ---------- hero ----------
+     The hero is a tall scroll track. The stage inside it pins for the length
+     of that track, and progress through the track scrubs the timelapse, so
+     the clip plays forwards as you scroll down and backwards as you scroll up.
+
+     Default state is "fallback": a plain 100dvh hero showing the drawn
+     sunrise. The tall track is only introduced once the video reports usable
+     metadata, so a browser that cannot play it never gets empty scroll. */
   .hero {
     position: relative;
-    min-height: 100dvh;
-    display: grid;
-    align-items: end;
+    height: 100dvh;
+  }
+  .hero[data-render="video"] { height: var(--hero-track); }
+
+  .hero__stage {
+    position: sticky;
+    top: 0;
+    height: 100dvh;
     overflow: hidden;
     isolation: isolate;
+    display: grid;
+    align-items: end;
   }
-  .hero__canvas, .hero__fallback {
+
+  .hero__video, .hero__fallback {
     position: absolute; inset: 0;
     width: 100%; height: 100%;
+    object-fit: cover;
     z-index: -2;
   }
-  .hero__fallback { display: none; }
-  .hero[data-render="fallback"] .hero__canvas { display: none; }
-  .hero[data-render="fallback"] .hero__fallback { display: block; }
+  /* The drawn sunrise sits permanently behind the video, so it covers the
+     gap before the first frame decodes as well as outright failure. */
+  .hero__fallback { z-index: -3; }
+  .hero[data-render="fallback"] .hero__video { display: none; }
 
-  /* Scrim so the sand-coloured type holds AA over the brightest water. */
-  .hero::after {
+  /* Scrim so the sand-coloured type holds AA over the brightest frames. */
+  .hero__stage::after {
     content: "";
     position: absolute; inset: 0; z-index: -1;
     background: linear-gradient(
@@ -599,10 +621,11 @@
   .contact .core { padding: 1.15rem 1.25rem; }
   /* min-height reserves two lines so the names sit on one baseline across all
      four cards, whether the role label wraps or not. */
-  .contact__role { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .13em; color: var(--ink-faint); min-height: 2.6em; }
+  /* Two lines at the inherited 1.6 line-height, measured in the label's own
+     em, so all four names sit on one baseline whether the role wraps or not. */
+  .contact__role { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .13em; color: var(--ink-faint); min-height: 3.2em; }
   .contact__name { font-family: var(--display); font-size: 1.2rem; font-variation-settings: "wdth" 90; color: var(--foam); }
   .contact__tel { color: var(--lowsun); text-underline-offset: 3px; }
-  .contact__tel[data-empty] { color: var(--ink-faint); text-decoration: none; }
 
   /* ---------- footer ---------- */
   .foot {
@@ -739,11 +762,18 @@
 <!-- ============================================================ *
  * S0 · HERO
  * ============================================================ -->
-<header class="hero" id="hero" data-render="webgl">
-  <canvas class="hero__canvas" aria-hidden="true"></canvas>
+<header class="hero" id="hero" data-render="fallback">
+ <div class="hero__stage">
+  <!-- Scroll-scrubbed timelapse. Never played: the script drives currentTime
+       from scroll position. muted + playsinline are what let mobile browsers
+       decode it at all without a tap. -->
+  <video class="hero__video" data-hero-video
+         src="./media/hero.mp4"
+         muted playsinline preload="auto"
+         disablepictureinpicture aria-hidden="true"></video>
 
-  <!-- Fallback #1: no WebGL. Fallback #2: prefers-reduced-motion.
-       Same composition, roughly 3KB, no animation under reduced motion. -->
+  <!-- Shown behind the video while it loads, and on its own when the video
+       cannot play or the reader prefers reduced motion. Roughly 3KB. -->
   <svg class="hero__fallback" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <defs>
       <linearGradient id="fbSky" x1="0" y1="0" x2="0" y2="1">
@@ -775,7 +805,7 @@
   </svg>
 
   <div class="hero__inner">
-    <h1>UFR Team Building</h1>
+    <h1>Development Finance Teambuilding 2026</h1>
     <p class="hero__tagline" data-tagline>Three days east, where the sun comes up out of the sea.</p>
     <div class="hero__facts mono">
       <span>12-14 AUG 2026</span>
@@ -785,6 +815,7 @@
       <span class="hero__count" data-countdown><b>&nbsp;</b></span>
     </div>
   </div>
+ </div>
 </header>
 
 <noscript>
@@ -1052,8 +1083,8 @@
 </main>
 
 <footer class="foot">
-  <span class="mono">INTERNAL &middot; PETRONAS UFR</span>
-  <span class="mono">UFR TEAM BUILDING &middot; DESARU &middot; 12-14 AUG 2026</span>
+  <span class="mono">INTERNAL &middot; PETRONAS DEVELOPMENT FINANCE</span>
+  <span class="mono">DEVELOPMENT FINANCE TEAMBUILDING 2026 &middot; DESARU</span>
 </footer>
 
 <!-- quick jump -->
@@ -1081,7 +1112,7 @@
 /* ============ EDIT EVERYTHING BELOW ============ */
 
 const EVENT = {
-  title:   "UFR Team Building",
+  title:   "Development Finance Teambuilding 2026",
   /* PLACEHOLDER. This line was written to fill the hero, not supplied by the
      committee. Replace it with the real event theme when there is one, or set
      it to "" to drop the line entirely. */
@@ -1307,7 +1338,7 @@ const CONTACTS = [
     host.innerHTML = CONTACTS.map((c) => {
       const tel = c.phone
         ? '<a class="contact__tel mono" href="tel:' + esc(c.phone.replace(/\s+/g, "")) + '">' + esc(c.phone) + "</a>"
-        : '<span class="contact__tel mono" data-empty>Number to follow</span>';
+        : "";
       return '<div class="contact shell"><div class="core">' +
                '<p class="contact__role">' + esc(c.role) + "</p>" +
                '<p class="contact__name">' + esc(c.name) + "</p>" + tel +
@@ -1538,192 +1569,84 @@ const CONTACTS = [
   })();
 
   /* ---------------------------------------------------------- *
-   * S0 · the sunrise
-   * Raw WebGL, one fullscreen fragment shader. No library, no CDN,
-   * no textures: the page stays self-contained and works on a
-   * resort wifi that cannot fetch three.js.
+   * S0 · the scroll-scrubbed timelapse
    *
-   * Desaru faces east. The sun rises out of the South China Sea
-   * there, so this is a sunrise, not the sunset every beach page
-   * defaults to.
+   * The video is never played. Scroll position through the hero's tall
+   * track is mapped straight onto currentTime, so the clip runs forwards
+   * as the reader scrolls down and backwards as they scroll up.
+   *
+   * The source clip carries a single keyframe across all 97 frames, which
+   * means every backward seek decodes from the very start. Two guards keep
+   * that affordable: never issue a seek while one is still in flight, and
+   * ignore movements smaller than half a frame.
    * ---------------------------------------------------------- */
-  (function sunrise() {
-    const hero = $("#hero");
-    const cvs  = $(".hero__canvas");
-    if (!hero || !cvs) return;
+  (function heroScrub() {
+    const hero  = $("#hero");
+    const video = $("[data-hero-video]");
+    if (!hero || !video) return;
 
-    const fallback = () => hero.setAttribute("data-render", "fallback");
+    // The markup ships as data-render="fallback", so doing nothing here
+    // leaves a plain 100dvh hero with the drawn sunrise and no dead scroll.
+    if (reduced.matches) { video.removeAttribute("src"); return; }
 
-    if (reduced.matches) { fallback(); return; }
+    /* canPlayType("video/mp4") answers "maybe" on builds with no H.264 at all,
+       so ask about the actual codec. A browser that cannot decode the file is
+       better off keeping the drawn sunrise than loading 2MB to fail. */
+    const src = video.getAttribute("src") || "";
+    const can = /\.webm(\?|$)/i.test(src)
+      ? (video.canPlayType('video/webm; codecs="vp9"') || video.canPlayType('video/webm; codecs="vp8"'))
+      : video.canPlayType('video/mp4; codecs="avc1.42E01E"');
+    if (!can) { video.removeAttribute("src"); return; }
 
-    let gl;
-    try {
-      gl = cvs.getContext("webgl", { antialias: false, alpha: false, depth: false, powerPreference: "low-power" })
-        || cvs.getContext("experimental-webgl");
-    } catch (e) { /* falls through */ }
-    if (!gl) { fallback(); return; }
+    let duration = 0, running = false, raf = 0;
 
-    const VERT = [
-      "attribute vec2 aPos;",
-      "void main(){ gl_Position = vec4(aPos, 0.0, 1.0); }"
-    ].join("\n");
-
-    const FRAG = [
-      "precision highp float;",
-      "uniform vec2  uRes;",
-      "uniform float uTime;",
-      "uniform vec3  uSky, uSea, uSun, uFoam;",
-
-      "float hash(vec2 p){ return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123); }",
-
-      "float waves(vec2 p, float t){",
-      "  float h = 0.0;",
-      "  h += sin(p.x * 0.90 + t * 0.55) * 0.50;",
-      "  h += sin(p.y * 1.30 - t * 0.42) * 0.36;",
-      "  h += sin((p.x + p.y) * 1.90 + t * 0.83) * 0.22;",
-      "  h += sin((p.x * 1.70 - p.y * 1.10) * 2.70 - t * 1.15) * 0.12;",
-      "  return h;",
-      "}",
-
-      "void main(){",
-      "  vec2 uv = gl_FragCoord.xy / uRes;",
-      "  float aspect = uRes.x / uRes.y;",
-      "  vec2 p = vec2((uv.x - 0.5) * aspect, uv.y);",
-
-      "  const float horizon = 0.52;",
-      "  vec2  sunPos  = vec2(0.16, horizon + 0.048);",
-      "  float sunDist = length((p - sunPos) * vec2(1.0, 1.30));",
-
-      /* the warm band that hugs the horizon, shared by sky and sea */
-      "  vec3 warm = mix(uSun * 0.90, uFoam, 0.16);",
-      "  vec3 col;",
-
-      "  if (uv.y > horizon) {",
-      "    float t = (uv.y - horizon) / (1.0 - horizon);",
-      "    col = mix(warm, uSky, pow(t, 0.42));",
-      "    float bloom = pow(max(0.0, 1.0 - sunDist * 1.55), 3.0);",
-      "    col = mix(col, uSun, clamp(bloom * 0.85, 0.0, 1.0));",
-      "    col = mix(col, mix(uSun, uFoam, 0.55), smoothstep(0.044, 0.030, sunDist));",
-      "  } else {",
-      "    float depth = horizon - uv.y;",
-      "    float d = 0.34 / max(depth, 0.004);",
-      "    vec2  w = vec2(p.x * d * 0.85 + uTime * 0.05, d * 1.60 - uTime * 0.10);",
-
-      "    float h  = waves(w, uTime);",
-      "    float e  = 0.34;",
-      "    float hx = waves(w + vec2(e, 0.0), uTime) - h;",
-      "    float hy = waves(w + vec2(0.0, e), uTime) - h;",
-      "    float slope = clamp(1.0 - (hx * 1.4 + hy * 0.9) * 0.5, 0.0, 2.0);",
-
-      "    float far = smoothstep(0.0, 0.30, depth);",
-      "    col = mix(mix(uSea, uSun, 0.10), uSky * 0.70, far);",
-
-      /* the sun path: a lane of specular that widens toward the viewer */
-      "    float lane = exp(-pow((p.x - sunPos.x) / (0.055 + depth * 2.2), 2.0));",
-      "    col += uSun * pow(max(0.0, slope - 0.55), 2.0) * lane * 1.60;",
-
-      /* Glitter. The cell grid is screen-space, not wave-space: wave coords are
-         stretched by 1/depth, so hashing them produced metre-wide blocks in the
-         foreground. Seeding with the wave height makes sparks ride the crests. */
-      "    float g = hash(floor(gl_FragCoord.xy * 0.34) + floor(vec2(h * 3.0 + uTime * 1.5)));",
-      "    col += uSun * step(0.972, g) * lane * smoothstep(0.015, 0.10, depth) * (1.0 - far * 0.55) * 0.55;",
-
-      /* foam crests */
-      "    col = mix(col, uFoam, smoothstep(0.74, 0.96, h * 0.5 + 0.5) * smoothstep(0.02, 0.20, depth) * 0.10);",
-
-      /* haze into the horizon line, which also hides shader aliasing there */
-      "    col = mix(warm * 0.92, col, smoothstep(0.0, 0.045, depth));",
-      "  }",
-
-      /* vignette, so the sand-coloured type keeps its contrast */
-      "  col *= 1.0 - 0.40 * pow(length((uv - vec2(0.42, 0.52)) * vec2(1.05, 1.0)), 2.1);",
-      "  gl_FragColor = vec4(col, 1.0);",
-      "}"
-    ].join("\n");
-
-    function compile(type, src) {
-      const s = gl.createShader(type);
-      gl.shaderSource(s, src);
-      gl.compileShader(s);
-      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-        console.warn("[hero] shader failed:", gl.getShaderInfoLog(s));
-        return null;
-      }
-      return s;
-    }
-
-    const vs = compile(gl.VERTEX_SHADER, VERT);
-    const fs = compile(gl.FRAGMENT_SHADER, FRAG);
-    if (!vs || !fs) { fallback(); return; }
-
-    const prog = gl.createProgram();
-    gl.attachShader(prog, vs);
-    gl.attachShader(prog, fs);
-    gl.linkProgram(prog);
-    if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { fallback(); return; }
-    gl.useProgram(prog);
-
-    const buf = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
-    const aPos = gl.getAttribLocation(prog, "aPos");
-    gl.enableVertexAttribArray(aPos);
-    gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-    const uRes  = gl.getUniformLocation(prog, "uRes");
-    const uTime = gl.getUniformLocation(prog, "uTime");
-
-    const css = getComputedStyle(document.documentElement);
-    const rgb = (token, fb) => {
-      const hex = (css.getPropertyValue(token).trim() || fb).replace("#", "");
-      return [0, 2, 4].map((i) => parseInt(hex.substr(i, 2), 16) / 255);
+    const giveUp = () => {
+      stop();
+      hero.setAttribute("data-render", "fallback");
     };
-    gl.uniform3fv(gl.getUniformLocation(prog, "uSky"),  rgb("--casuarina", "#132E2B"));
-    gl.uniform3fv(gl.getUniformLocation(prog, "uSea"),  rgb("--seagrass",  "#357069"));
-    gl.uniform3fv(gl.getUniformLocation(prog, "uSun"),  rgb("--lowsun",    "#F2C14E"));
-    gl.uniform3fv(gl.getUniformLocation(prog, "uFoam"), rgb("--foam",      "#FBF8F3"));
+    video.addEventListener("error", giveUp, { once: true });
 
-    function resize() {
-      const dpr = Math.min(devicePixelRatio || 1, 1.5);
-      const w = Math.max(1, Math.round(cvs.clientWidth  * dpr));
-      const h = Math.max(1, Math.round(cvs.clientHeight * dpr));
-      if (cvs.width === w && cvs.height === h) return;
-      cvs.width = w; cvs.height = h;
-      gl.viewport(0, 0, w, h);
-      gl.uniform2f(uRes, w, h);
+    video.addEventListener("loadedmetadata", () => {
+      duration = video.duration;
+      if (!duration || !isFinite(duration)) { giveUp(); return; }
+      hero.setAttribute("data-render", "video");
+      start();
+    }, { once: true });
+
+    /* iOS will not paint a frame for a seek until the element has been
+       through one play/pause cycle, even when muted and inline. */
+    video.addEventListener("loadeddata", () => {
+      const p = video.play();
+      if (p && p.then) p.then(() => video.pause()).catch(() => {});
+    }, { once: true });
+
+    function progress() {
+      const track = hero.offsetHeight - innerHeight;
+      if (track <= 0) return 0;
+      return Math.min(1, Math.max(0, -hero.getBoundingClientRect().top / track));
     }
 
-    /* The render loop stops the moment the hero leaves the viewport or the
-       tab is hidden, so scrolling the rest of the page costs nothing. */
-    let raf = 0, running = false, t0 = performance.now();
-
-    function frame(now) {
+    function frame() {
       if (!running) return;
-      resize();
-      gl.uniform1f(uTime, (now - t0) / 1000);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      const target = progress() * duration;
+      if (!video.seeking && Math.abs(video.currentTime - target) > 1 / 48) {
+        try { video.currentTime = target; } catch (e) { /* seek raced a reload */ }
+      }
       raf = requestAnimationFrame(frame);
     }
-    function start() { if (running) return; running = true; raf = requestAnimationFrame(frame); }
+    function start() { if (running || !duration) return; running = true; raf = requestAnimationFrame(frame); }
     function stop()  { running = false; cancelAnimationFrame(raf); }
 
+    /* The loop only runs while the hero is on screen, so the rest of the
+       page scrolls without a per-frame layout read. */
     new IntersectionObserver((es) => {
       es.forEach((e) => (e.isIntersecting && !document.hidden) ? start() : stop());
-    }, { threshold: 0.01 }).observe(hero);
+    }, { threshold: 0 }).observe(hero);
 
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) stop();
       else if (hero.getBoundingClientRect().bottom > 0) start();
     });
-
-    addEventListener("resize", resize, { passive: true });
-
-    gl.getExtension("WEBGL_lose_context") && cvs.addEventListener("webglcontextlost", (e) => {
-      e.preventDefault(); stop(); fallback();
-    });
-
-    resize();
-    start();
   })();
 
 })();

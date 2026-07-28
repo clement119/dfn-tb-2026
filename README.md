@@ -1,10 +1,15 @@
-# UFR Team Building - Desaru joining instructions
+# Development Finance Teambuilding 2026 - Desaru joining instructions
 
-A single self-contained `index.html`. Open it by double-clicking, attach it to an
-email, drop it on a file share, or host it statically. There is no build step and
-nothing to install.
+`index.html` plus a `media/` folder holding the hero video. There is no build
+step and nothing to install.
 
-- **Event:** UFR Team Building
+> **This is no longer a single self-contained file.** The scroll-scrubbed hero
+> needs `media/hero.mp4` sitting next to `index.html`, so emailing the HTML on
+> its own will lose the video (the page falls back to a drawn sunrise and still
+> reads correctly). To send it by email, zip the folder. On a file share or a
+> static host, keep the folder structure intact.
+
+- **Event:** Development Finance Teambuilding 2026
 - **Where:** Sand & Sandals Desaru Beach Resort & Spa, Bandar Penawar, 81930 Kota Tinggi, Johor
 - **When:** 12 to 14 August 2026 (Wednesday to Friday, 3D2N)
 
@@ -70,7 +75,8 @@ While any photo or phone number is still missing, the browser console prints a
 "Not ready to distribute" warning listing exactly what is outstanding. Press F12
 to see it.
 
-Use WebP or compressed JPEG and keep the page under about 2 MB in total.
+Use WebP or compressed JPEG. The hero video is already about 2.1 MB, so keep
+the photographs light.
 
 ---
 
@@ -122,7 +128,7 @@ public marketing site:
 - `noindex, nofollow` is set, so search engines will not list it.
 - There are deliberately **no** Open Graph or Twitter card tags, so a link pasted
   into a group chat will not unfurl into a preview of an internal document.
-- The footer carries an `INTERNAL - PETRONAS UFR` marker.
+- The footer carries an `INTERNAL - PETRONAS DEVELOPMENT FINANCE` marker.
 
 **Send it through an internal channel** (email attachment, SharePoint, Teams)
 rather than putting it on a public URL.
@@ -152,9 +158,11 @@ Two things worth knowing before that URL exists:
   the only way to publish is to make the repository public, which would also
   expose this README and the commit history.
 
-The workflow deliberately publishes **only** `index.html` and anything in `img/`.
+The workflow deliberately publishes **only** `index.html`, `img/` and `media/`.
 This README is excluded, because it lists the unresolved blockers and the
-committee's open items and would otherwise be served at `/README.md`.
+committee's open items and would otherwise be served at `/README.md`. The build
+fails loudly if `media/hero.mp4` is missing, rather than shipping a hero that
+404s.
 
 ---
 
@@ -171,9 +179,17 @@ committee's open items and would otherwise be served at `/README.md`.
 - **The three typefaces load from Google Fonts and Fontshare.** If the network is
   slow or a corporate proxy blocks them, the page falls back to the system sans
   and stays completely readable, just less distinctive.
-- **The animated hero needs WebGL.** Without it, or when the reader has "reduce
-  motion" turned on, the page shows a static sunrise graphic instead. Both paths
+- **The hero video needs H.264 support and a real network fetch.** Every current
+  browser decodes H.264, but if the file is missing, blocked, or the reader has
+  "reduce motion" turned on, the hero falls back to a drawn sunrise and the tall
+  scroll track collapses to a normal one-screen hero. All three fallback paths
   are tested.
+- **The video is 2.1 MB**, which is most of the page's weight. It is only fetched
+  when the browser can actually play it and the reader has not asked for reduced
+  motion.
+- **The clip is 16:9 and gets centre-cropped on phones.** In portrait you see
+  roughly the middle third of the frame. If something important sits near the
+  left or right edge, adjust `object-position` on `.hero__video`.
 
 ---
 
@@ -182,9 +198,10 @@ committee's open items and would otherwise be served at `/README.md`.
 Hand-written CSS and vanilla JavaScript, no framework and no build step, so the
 file keeps working wherever it is opened.
 
-- The hero is a single WebGL fragment shader written from scratch, about 8 KB, so
-  there is no Three.js CDN request to fail on a weak connection. Desaru faces
-  east, so it is a sunrise rather than the sunset most beach pages default to.
+- The hero is a scroll-scrubbed timelapse. The video is never played: scroll
+  position through the hero's tall track is mapped straight onto `currentTime`,
+  so the clip runs forwards as you scroll down and backwards as you scroll up.
+  The scrub loop only runs while the hero is on screen.
 - Scroll effects use CSS scroll-driven animations with an `IntersectionObserver`
   fallback. There are no scroll event listeners.
 - The render loop stops when the hero scrolls out of view or the tab is hidden.
