@@ -242,6 +242,27 @@
   .hero__fallback { z-index: -3; }
   .hero[data-render="fallback"] .hero__video { display: none; }
 
+  /* On a narrow phone, cover forces the 1280x720 source to stretch by
+     whichever axis needs it more to fill a roughly 9:19.5 box, here the
+     height, by about 1.17x in CSS pixels, which on a 3x-density screen is
+     a ~3.5x upscale past the source's own resolution. That mismatch, not
+     a delivery problem, is what read as pixelated.
+
+     Sizing the video near its own resolution instead (a modest 1.45x
+     rather than cover's ~3.5x), anchored to the top where the scrim is
+     fully clear, keeps it crisp. The drawn sunrise behind it is a vector,
+     so it has no resolution to run out of; left at its usual full-bleed
+     size, it fills the rest of the hero below the video as a matching
+     backdrop, same palette, rather than a stretched, blurred crop trying
+     to cover the same tall box the video no longer has to. */
+  @media (max-width: 600px) {
+    .hero__video {
+      top: 0; bottom: auto; left: 50%; right: auto;
+      width: 145%; height: auto;
+      transform: translateX(-50%);
+    }
+  }
+
   /* Scrim so the sand-coloured type holds AA over the brightest frames. */
   .hero__stage::after {
     content: "";
