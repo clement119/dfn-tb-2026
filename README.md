@@ -129,6 +129,35 @@ rather than putting it on a public URL.
 
 ---
 
+## Hosting on GitHub Pages
+
+`.github/workflows/pages.yml` publishes the page on every push to this branch,
+and can also be run by hand from the Actions tab.
+
+**Pages has to be switched on once, by hand**, before the workflow can deploy.
+Go to **Settings -> Pages** and set **Source** to **GitHub Actions**. Do not pick
+"Deploy from a branch"; that conflicts with the workflow. Then re-run the failed
+run from the Actions tab, or push any commit.
+
+The site publishes to `https://clement119.github.io/dfn-tb-2026/`.
+
+Two things worth knowing before that URL exists:
+
+- **The published site is public.** GitHub Pages has no access control on a
+  personal account, so anyone with the link can open it. The page is marked
+  `noindex`, so it will not appear in search results, but that only makes it
+  unlisted, not private. Once the organiser phone numbers are filled in, those
+  become publicly readable too.
+- **Pages on a private repository needs GitHub Pro or higher.** On the free plan
+  the only way to publish is to make the repository public, which would also
+  expose this README and the commit history.
+
+The workflow deliberately publishes **only** `index.html` and anything in `img/`.
+This README is excluded, because it lists the unresolved blockers and the
+committee's open items and would otherwise be served at `/README.md`.
+
+---
+
 ## Known limitations
 
 - **The agenda, checklist and contact cards need JavaScript.** They are generated
