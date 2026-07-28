@@ -1585,30 +1585,58 @@ const CONTACTS = [
     const video = $("[data-hero-video]");
     if (!hero || !video) return;
 
-    // The markup ships as data-render="fallback", so doing nothing here
-    // leaves a plain 100dvh hero with the drawn sunrise and no dead scroll.
-    if (reduced.matches) { video.removeAttribute("src"); return; }
+    // Every early exit explains itself in the console. The fallback is
+    // silent to a reader by design, but it should never be silent to
+    // whoever is debugging why the video isn't showing.
+    const bail = (reason) => {
+      console.warn('[hero] falling back to the static sunrise: ' + reason);
+      video.removeAttribute("src");
+    };
 
-    /* canPlayType("video/mp4") answers "maybe" on builds with no H.264 at all,
-       so ask about the actual codec. A browser that cannot decode the file is
-       better off keeping the drawn sunrise than loading 2MB to fail. */
+    if (reduced.matches) { bail("prefers-reduced-motion is on"); return; }
+
+    /* A codec pre-check is worth doing so a browser with zero video/mp4
+       support never fetches 2MB to fail. It should NOT be a strict profile
+       match against a guessed string: the source file's actual profile can
+       differ from any single string tested, and a mismatch there would
+       reject a file the browser could actually play. Ask generically. */
     const src = video.getAttribute("src") || "";
-    const can = /\.webm(\?|$)/i.test(src)
+    const isWebm = /\.webm(\?|$)/i.test(src);
+    const can = isWebm
       ? (video.canPlayType('video/webm; codecs="vp9"') || video.canPlayType('video/webm; codecs="vp8"'))
-      : video.canPlayType('video/mp4; codecs="avc1.42E01E"');
-    if (!can) { video.removeAttribute("src"); return; }
+      : video.canPlayType('video/mp4');
+    if (!can) {
+      bail((isWebm ? "no WebM" : "no MP4") + " support at all (canPlayType returned an empty string)");
+      return;
+    }
 
-    let duration = 0, running = false, raf = 0;
+    let duration = 0, running = false, raf = 0, settled = false;
 
-    const giveUp = () => {
+    const giveUp = (reason) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(stallTimer);
       stop();
       hero.setAttribute("data-render", "fallback");
+      console.warn(
+        '[hero] video did not become playable, falling back: ' + reason +
+        '\n  networkState=' + video.networkState + ' readyState=' + video.readyState +
+        (video.error ? ' error.code=' + video.error.code : ' error=null')
+      );
     };
-    video.addEventListener("error", giveUp, { once: true });
+    video.addEventListener("error", () => giveUp("error event"), { once: true });
+
+    // Some browsers neither fire loadedmetadata nor error for a file they
+    // quietly refuse to decode; they just never progress. Without this, that
+    // looks identical to "still loading" forever instead of falling back.
+    const stallTimer = setTimeout(() => giveUp("no loadedmetadata within 8s"), 8000);
 
     video.addEventListener("loadedmetadata", () => {
+      if (settled) return;
+      clearTimeout(stallTimer);
       duration = video.duration;
-      if (!duration || !isFinite(duration)) { giveUp(); return; }
+      if (!duration || !isFinite(duration)) { giveUp("duration is " + duration); return; }
+      settled = true;
       hero.setAttribute("data-render", "video");
       start();
     }, { once: true });
