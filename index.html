@@ -769,7 +769,7 @@
        decode it at all without a tap. -->
   <video class="hero__video" data-hero-video
          src="./media/hero.mp4"
-         muted playsinline preload="auto"
+         muted playsinline webkit-playsinline preload="auto"
          disablepictureinpicture aria-hidden="true"></video>
 
   <!-- Shown behind the video while it loads, and on its own when the video
@@ -1584,6 +1584,12 @@ const CONTACTS = [
     const hero  = $("#hero");
     const video = $("[data-hero-video]");
     if (!hero || !video) return;
+
+    // Some browsers only honour the muted ATTRIBUTE reliably once the
+    // property is also set from script; without this, autoplay of the brief
+    // play/pause priming below can be blocked on a handful of mobile builds.
+    video.muted = true;
+    video.defaultMuted = true;
 
     // Every early exit explains itself in the console. The fallback is
     // silent to a reader by design, but it should never be silent to
