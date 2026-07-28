@@ -1313,6 +1313,67 @@ const CONTACTS = [
   ));
 
   /* ---------------------------------------------------------- *
+   * On-device diagnostics: add ?debug=1 to the URL.
+   *
+   * Built for troubleshooting the hero video on a phone with no computer
+   * to plug into for remote inspector access. Shows the same facts the
+   * console would (video readyState, canPlayType results, reduced-motion
+   * state, and every [hero] warning), directly on the page, so the whole
+   * process is: open the link, screenshot the strip at the bottom, send it.
+   * Placed before heroScrub() runs so its console.warn override is in
+   * place before any of its diagnostics fire.
+   * ---------------------------------------------------------- */
+  (function debugPanel() {
+    if (new URLSearchParams(location.search).get("debug") !== "1") return;
+
+    const panel = document.createElement("div");
+    panel.id = "debug-panel";
+    panel.style.cssText = [
+      "position:fixed", "left:0", "right:0", "bottom:0", "max-height:46vh",
+      "overflow:auto", "background:color-mix(in srgb, var(--casuarina) 96%, #000)",
+      "color:var(--shell)", "font-family:var(--mono)", "font-size:11px",
+      "line-height:1.6", "padding:.6rem .8rem .8rem", "z-index:99999",
+      "white-space:pre-wrap", "border-top:2px solid var(--lowsun)"
+    ].join(";");
+    document.documentElement.appendChild(panel);
+
+    const warnings = [];
+    const originalWarn = console.warn.bind(console);
+    console.warn = (...args) => {
+      originalWarn(...args);
+      warnings.push(args.map(String).join(" "));
+      render();
+    };
+
+    function state() {
+      const v = $("[data-hero-video]"), hero = $("#hero");
+      if (!v || !hero) return "no hero/video element found on this page";
+      return [
+        "data-render=" + hero.dataset.render,
+        "src=" + (v.getAttribute("src") || "(removed)"),
+        "readyState=" + v.readyState + "  networkState=" + v.networkState,
+        "duration=" + v.duration + "  currentTime=" + (v.currentTime || 0).toFixed(2),
+        "error=" + (v.error ? "code " + v.error.code : "null"),
+        "prefers-reduced-motion=" + matchMedia("(prefers-reduced-motion: reduce)").matches,
+        'canPlayType("video/mp4")=' + JSON.stringify(v.canPlayType("video/mp4")),
+        'canPlayType(avc1 baseline)=' + JSON.stringify(v.canPlayType('video/mp4; codecs="avc1.42E01E"')),
+      ].join("\n");
+    }
+
+    function render() {
+      panel.textContent =
+        "HERO VIDEO DEBUG. Screenshot this strip and send it back.\n" +
+        "-".repeat(40) + "\n" +
+        state() +
+        "\n\n[hero] warnings:\n" +
+        (warnings.length ? warnings.join("\n") : "(none yet)");
+    }
+
+    render();
+    setInterval(render, 500);
+  })();
+
+  /* ---------------------------------------------------------- *
    * Content warnings, so an unfinished page never ships quietly
    * ---------------------------------------------------------- */
   (function warn() {

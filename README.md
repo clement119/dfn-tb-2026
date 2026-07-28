@@ -215,6 +215,35 @@ fails loudly if `media/hero.mp4` is missing, rather than shipping a hero that
 
 ---
 
+## If the hero video doesn't show
+
+Every fallback path logs why. Two ways to see it, easiest first.
+
+**On the phone itself, no computer needed:** open the page with `?debug=1` on
+the end of the URL, for example `https://.../index.html?debug=1`. A strip
+appears at the bottom of the screen showing the video's live state
+(`data-render`, `readyState`, `canPlayType` results, whether reduce-motion is
+on) and every warning the hero has logged. Screenshot that strip and send it
+along; it says exactly which of the fallback reasons fired.
+
+**With a Mac, for a fuller console:** on the iPhone, go to
+**Settings > Safari > Advanced** and turn on **Web Inspector**. Connect the
+phone to a Mac with a cable, open Safari on the Mac, and in the
+**Develop** menu (turn it on first in Safari's settings if it's not in the menu
+bar) find the phone's name, then the page's tab. That opens the real console,
+same as pressing F12 on desktop.
+
+The fallback reasons themselves, in case the strip or console names one:
+
+| Reason | What it means |
+|---|---|
+| `prefers-reduced-motion is on` | The device (or an accessibility setting) asked for reduced motion. Working as intended: this is the one case where the fallback is a choice, not a failure. |
+| `no MP4 support at all` | The browser answered empty to `canPlayType`. Should not happen on any current mobile browser. |
+| `error event` (with a `networkState`/`readyState`/`error.code`) | The browser tried to load the file and gave up. The error code narrows down why. |
+| `no loadedmetadata within 8s` | The browser neither played the file nor errored, it just went quiet. This is the case the debug strip exists for: it is otherwise indistinguishable from "still loading". |
+
+---
+
 ## How it was built
 
 Hand-written CSS and vanilla JavaScript, no framework and no build step, so the
