@@ -50,14 +50,18 @@ A few conventions worth knowing:
 
 ---
 
-## Adding the photographs
+## The photographs
 
-Every image slot is empty on purpose. Rather than fill them with stock beach
-photos, each slot renders a drawn horizon graphic labelled with what belongs
-there, so nobody mistakes a placeholder for the actual resort and the layout does
-not shift when the real photo arrives.
+Five slots: the large photo in "The stay" plus a four-up gallery (beach, pool,
+room, meeting space) underneath it. All five currently show real photographs of
+Sand & Sandals Desaru, downloaded from the resort's own public site
+(sandandsandals.com) and re-hosted in `img/` as WebP, roughly 500 KB total.
+They are not hotlinked: the files live in this repository.
 
-To add photos, put a value against the matching key in `ASSETS`:
+**These are stand-ins for the committee's own event photography, not the final
+choice.** They show the real venue accurately, but nobody on the trip took
+them. Swap them for the committee's own photos of this event, or the resort's,
+whenever those exist, the same way you'd change any other photo:
 
 ```js
 const ASSETS = {
@@ -67,16 +71,20 @@ const ASSETS = {
 };
 ```
 
+Leave any key as `""` and that slot falls back to a drawn horizon graphic
+labelled with what belongs there, so a placeholder is never mistaken for the
+venue and the layout doesn't shift when a photo arrives.
+
 **To see which slot is which**, open the page with `?assets=debug` on the end of
 the URL, for example `index.html?assets=debug`. Every image slot is outlined and
 labelled with its key name.
 
-While any photo or phone number is still missing, the browser console prints a
-"Not ready to distribute" warning listing exactly what is outstanding. Press F12
-to see it.
+While any phone number is still missing, the browser console prints a "Not
+ready to distribute" warning listing exactly what is outstanding. Press F12 to
+see it.
 
-Use WebP or compressed JPEG. The hero video is already about 2.1 MB, so keep
-the photographs light.
+Use WebP or compressed JPEG for anything you add. The hero video alone is
+about 3.7 MB, so keep new photographs light.
 
 ---
 
@@ -133,6 +141,15 @@ public marketing site:
 **Send it through an internal channel** (email attachment, SharePoint, Teams)
 rather than putting it on a public URL.
 
+**On the photographs specifically:** they are the resort's own marketing
+photography, downloaded from their public website rather than hotlinked. That
+is a reasonable way to show attendees the actual venue while real photos are
+pending, but it is still someone else's copyrighted photography being
+reproduced without asking. Low risk for a small internal page that only
+promotes their venue, not a concern if this stays on an internal channel, but
+worth knowing before this goes anywhere more public than that, and worth
+replacing with the committee's own photos once those exist regardless.
+
 ---
 
 ## Hosting on GitHub Pages
@@ -184,9 +201,14 @@ fails loudly if `media/hero.mp4` is missing, rather than shipping a hero that
   "reduce motion" turned on, the hero falls back to a drawn sunrise and the tall
   scroll track collapses to a normal one-screen hero. All three fallback paths
   are tested.
-- **The video is 2.1 MB**, which is most of the page's weight. It is only fetched
-  when the browser can actually play it and the reader has not asked for reduced
-  motion.
+- **The video is about 3.7 MB**, which is most of the page's weight. Every one
+  of its 97 frames is encoded as an independent keyframe rather than the usual
+  mix of keyframes and predicted frames, so any scroll position can be decoded
+  directly instead of walking a chain back to frame zero. That costs more file
+  size than a normally-encoded clip of the same length, but it is what makes
+  scroll-scrubbing look right on both desktop and mobile. It is only fetched
+  when the browser can actually play it and the reader has not asked for
+  reduced motion.
 - **The clip is 16:9 and gets centre-cropped on phones.** In portrait you see
   roughly the middle third of the frame. If something important sits near the
   left or right edge, adjust `object-position` on `.hero__video`.

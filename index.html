@@ -182,6 +182,7 @@
   .col-agenda   { grid-column: 1 / 13; }
   .col-stay-a   { grid-column: 1 / 9;  }
   .col-stay-b   { grid-column: 9 / 13; }
+  .col-gallery  { grid-column: 1 / 13; margin-top: clamp(1.5rem, 4vh, 3rem); }
   .col-pack     { grid-column: 3 / 11; }
   .col-safety   { grid-column: 2 / 12; }
 
@@ -492,6 +493,54 @@
     color: var(--ink-faint);
   }
 
+  /* A quiet supplementary strip, not a second hero moment: real photos,
+     equal treatment, one item doubled in width because the beach shot is
+     naturally a wide composition and the others are not. */
+  /* 5 tracks, not 4: the wide item spans 2 and the other three span 1 each,
+     2+1+1+1 = 5. Against a 4-column grid that remainder wraps the fourth
+     item onto an orphaned row by itself. */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: clamp(.75rem, 2vw, 1.25rem);
+    list-style: none;
+  }
+  .gallery__item {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--r-core);
+    overflow: hidden;
+    background: var(--shelf);
+  }
+  .gallery__item--wide { grid-column: span 2; }
+  .gallery__item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* Scrim behind the caption: unlike the drawn placeholders, a real photo's
+     own contrast can't be relied on to keep the label legible. */
+  .gallery__item::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(10,20,18,.6), transparent 55%);
+    pointer-events: none;
+  }
+  .gallery__cap {
+    position: absolute; left: .85rem; bottom: .65rem; z-index: 1;
+    font-family: var(--mono); font-size: .68rem;
+    text-transform: uppercase; letter-spacing: .12em;
+    color: var(--foam);
+  }
+  @media (max-width: 768px) {
+    .gallery {
+      grid-auto-flow: column;
+      grid-auto-columns: 78%;
+      grid-template-columns: none;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      padding-bottom: .25rem;
+      -webkit-overflow-scrolling: touch;
+    }
+    .gallery__item { grid-column: auto; scroll-snap-align: start; }
+  }
+
   .facts { display: grid; gap: 0; margin-top: 1.5rem; }
   .fact { padding-block: .95rem; border-top: 1px solid var(--hairline-soft); display: grid; gap: .15rem; }
   .fact dt { font-family: var(--mono); font-size: .7rem; text-transform: uppercase; letter-spacing: .14em; color: var(--ink-faint); }
@@ -689,11 +738,15 @@
   /* ---------- confetti ---------- */
   .confetti { position: fixed; inset: 0; z-index: var(--z-confetti); pointer-events: none; }
 
-  /* ---------- asset debug (?assets=debug) ---------- */
-  [data-debug] .stay__figure { outline: 2px dashed var(--lowsun); outline-offset: -2px; }
-  [data-debug] .stay__figure::after {
+  /* ---------- asset debug (?assets=debug) ----------
+     ::before, not ::after: gallery items already use ::after for the
+     caption scrim, and one element only gets one of each pseudo-element. */
+  [data-debug] .stay__figure,
+  [data-debug] .gallery__item { outline: 2px dashed var(--lowsun); outline-offset: -2px; }
+  [data-debug] .stay__figure::before,
+  [data-debug] .gallery__item::before {
     content: attr(data-asset-key);
-    position: absolute; left: .5rem; top: .5rem;
+    position: absolute; left: .5rem; top: .5rem; z-index: 2;
     background: var(--lowsun); color: var(--casuarina);
     font-family: var(--mono); font-size: .7rem; letter-spacing: .08em;
     padding: .2rem .5rem; border-radius: var(--r-chip);
@@ -935,7 +988,8 @@
 <section class="band" id="the-stay" aria-labelledby="h-stay">
   <div class="grid">
     <div class="col-stay-a reveal">
-      <figure class="stay__figure" data-asset="resortExterior" data-asset-key="resortExterior">
+      <figure class="stay__figure" data-asset="resortExterior" data-asset-key="resortExterior"
+              data-asset-alt="An elevated view of Sand &amp; Sandals Desaru Beach Resort, showing the main pool and guest room blocks.">
         <svg class="slot-empty" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           <defs>
             <linearGradient id="phSky" x1="0" y1="0" x2="0" y2="1">
@@ -978,6 +1032,27 @@
         <b>Rooming</b>
         Room lists and pairings will be shared before departure.
       </div>
+    </div>
+
+    <div class="col-gallery reveal">
+      <ul class="gallery" data-gallery>
+        <li class="gallery__item gallery__item--wide" data-asset="beachWide" data-asset-key="beachWide"
+            data-asset-mode="prepend" data-asset-alt="The resort's beach, with a shade tree and thatched-roof hut on the sand.">
+          <span class="gallery__cap">Beachfront</span>
+        </li>
+        <li class="gallery__item" data-asset="poolDeck" data-asset-key="poolDeck"
+            data-asset-mode="prepend" data-asset-alt="The resort's lagoon-style pool and swim-up bar.">
+          <span class="gallery__cap">Pool</span>
+        </li>
+        <li class="gallery__item" data-asset="roomInterior" data-asset-key="roomInterior"
+            data-asset-mode="prepend" data-asset-alt="A guest room interior with an ensuite vanity.">
+          <span class="gallery__cap">Room</span>
+        </li>
+        <li class="gallery__item" data-asset="meetingRoom" data-asset-key="meetingRoom"
+            data-asset-mode="prepend" data-asset-alt="A meeting room set up classroom-style with a projector screen.">
+          <span class="gallery__cap">Meeting space</span>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -1125,14 +1200,18 @@ const EVENT = {
 
 /* Drop in a URL, a local path ("./img/beach.jpg") or a base64 string.
    Leave a key empty and its slot renders the drawn-horizon placeholder.
-   Load the page with ?assets=debug to see which slot is which. */
+   Load the page with ?assets=debug to see which slot is which.
+
+   The five below are sourced from the resort's own public site
+   (sandandsandals.com), downloaded and re-hosted here rather than
+   hotlinked. Swap any of them for the committee's own photos from the
+   actual event by replacing the path; nothing else needs to change. */
 const ASSETS = {
-  heroFallback:   "",
-  resortExterior: "",
-  beachWide:      "",
-  meetingRoom:    "",
-  poolDeck:       "",
-  roomInterior:   ""
+  resortExterior: "./img/resort-exterior.webp",
+  beachWide:      "./img/beach-wide.webp",
+  meetingRoom:    "./img/meeting-room.webp",
+  poolDeck:       "./img/pool-deck.webp",
+  roomInterior:   "./img/room-interior.webp"
 };
 
 /* Day 3 is 14 Aug. The source agenda said "11-Jun (Friday)", which is a typo:
@@ -1259,10 +1338,13 @@ const CONTACTS = [
     if (!src) return;
     const img = document.createElement("img");
     img.src = src;
-    img.alt = "";
+    img.alt = slot.dataset.assetAlt || "";
     img.loading = "lazy";
     img.decoding = "async";
-    slot.replaceChildren(img);
+    // Gallery items keep their caption as a sibling; the stay photo's
+    // placeholder SVG and label are meant to disappear once it loads.
+    if (slot.dataset.assetMode === "prepend") slot.prepend(img);
+    else slot.replaceChildren(img);
   });
 
   if (new URLSearchParams(location.search).get("assets") === "debug") {
