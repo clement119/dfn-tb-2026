@@ -1348,11 +1348,16 @@ const CONTACTS = [
     function state() {
       const v = $("[data-hero-video]"), hero = $("#hero");
       if (!v || !hero) return "no hero/video element found on this page";
+      const buffered = [];
+      for (let i = 0; i < v.buffered.length; i++) {
+        buffered.push(v.buffered.start(i).toFixed(2) + "-" + v.buffered.end(i).toFixed(2));
+      }
       return [
         "data-render=" + hero.dataset.render,
         "src=" + (v.getAttribute("src") || "(removed)"),
         "readyState=" + v.readyState + "  networkState=" + v.networkState,
         "duration=" + v.duration + "  currentTime=" + (v.currentTime || 0).toFixed(2),
+        "paused=" + v.paused + "  buffered=" + (buffered.length ? buffered.join(",") : "(none)"),
         "error=" + (v.error ? "code " + v.error.code : "null"),
         "prefers-reduced-motion=" + matchMedia("(prefers-reduced-motion: reduce)").matches,
         'canPlayType("video/mp4")=' + JSON.stringify(v.canPlayType("video/mp4")),
@@ -1787,14 +1792,41 @@ const CONTACTS = [
       if (!duration || !isFinite(duration)) { giveUp("duration is " + duration); return; }
       settled = true;
       hero.setAttribute("data-render", "video");
-      start();
-    }, { once: true });
 
-    /* iOS will not paint a frame for a seek until the element has been
-       through one play/pause cycle, even when muted and inline. */
-    video.addEventListener("loadeddata", () => {
+      /* iOS Safari fetches metadata (readyState 1) and then, even for a
+         muted+playsinline video with preload="auto", stops buffering actual
+         frame data until something calls play(). Without this, "video" and
+         "the drawn sunrise showing through a transparent, un-decoded video
+         element" are visually identical, so this looked like the video was
+         missing when it had actually just stalled one stage short of it.
+         Triggering play() here, on loadedmetadata, is what unsticks it;
+         waiting for loadeddata doesn't work because loadeddata itself needs
+         the frame data this call is meant to unblock. */
       const p = video.play();
       if (p && p.then) p.then(() => video.pause()).catch(() => {});
+
+      // Belt and suspenders: if some other browser needs the data event
+      // instead, or the first nudge above didn't land in time, try again.
+      video.addEventListener("loadeddata", () => {
+        const p2 = video.play();
+        if (p2 && p2.then) p2.then(() => video.pause()).catch(() => {});
+      }, { once: true });
+
+      // If readyState still hasn't advanced past metadata-only a few
+      // seconds after the nudge, something is genuinely stuck rather than
+      // just slow; log it so this state is visible instead of silently
+      // looking like an idle, working video.
+      setTimeout(() => {
+        if (video.readyState < 2) {
+          console.warn(
+            '[hero] still at readyState=' + video.readyState + ' (metadata only) ' +
+            'several seconds after the play() nudge on loadedmetadata; ' +
+            'frame data never arrived. networkState=' + video.networkState
+          );
+        }
+      }, 4000);
+
+      start();
     }, { once: true });
 
     function progress() {
