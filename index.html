@@ -39,15 +39,18 @@
  * ============================================================ */
 @layer tokens {
   :root {
-    /* --- colour: six named tokens, no others --- */
-    --casuarina: #132E2B;  /* rhu trees lining Desaru beach. page ground */
-    --shell:     #EDE3D2;  /* pale Desaru sand. primary ink on dark */
-    --seagrass:  #357069;  /* South China Sea, green-cast. fills only, never text */
-    --lowsun:    #F2C14E;  /* sunrise light. sun, key facts, primary CTA */
-    --foam:      #FBF8F3;  /* tideline edge. highest-contrast text */
-    --flare:     #F04E37;  /* confetti only. appears once in the page lifecycle */
+    /* --- colour: the DFN'26 banner palette. Token names kept from the first
+       build (every rule references them); values now follow the event banner:
+       off-white paper, deep navy ink, teal accent, gold for celebration. --- */
+    --casuarina: #FBFAF7;  /* banner paper. page ground */
+    --shell:     #12384C;  /* banner navy ink. primary text */
+    --seagrass:  #9FC4C9;  /* soft teal wash. fills only, never text */
+    --lowsun:    #136B75;  /* banner brush teal. key facts, links, primary accent */
+    --foam:      #0D2230;  /* deepest banner navy. highest-contrast text */
+    --flare:     #D9A441;  /* celebration gold. confetti, appears once */
+    --gold:      #D6B594;  /* banner botanical gold. hairlines and fills, never text */
 
-    /* --seagrass on --casuarina is 2.5:1. It is a FILL token.
+    /* --seagrass stays a FILL token (soft teal on paper is well under 3:1).
        Any text colour must be --shell, --foam or --lowsun. */
 
     /* Both mixes are pinned by contrast, not by taste. The binding constraint
@@ -56,10 +59,15 @@
        and failed AA, so the hierarchy is carried by size and tracking instead. */
     --ink-muted: color-mix(in srgb, var(--shell) 84%, var(--casuarina));
     --ink-faint: color-mix(in srgb, var(--shell) 74%, var(--casuarina));
-    --wet-sand:  color-mix(in srgb, var(--casuarina) 84%, #000);
-    --shelf:     color-mix(in srgb, var(--casuarina) 88%, var(--foam) 12%);
-    --hairline:  color-mix(in srgb, var(--shell) 16%, transparent);
-    --hairline-soft: color-mix(in srgb, var(--shell) 9%, transparent);
+    --wet-sand:  color-mix(in srgb, var(--casuarina) 78%, #C8A87E);
+    --shelf:     color-mix(in srgb, var(--casuarina) 90%, var(--lowsun) 10%);
+    --hairline:  color-mix(in srgb, var(--shell) 22%, transparent);
+    --hairline-soft: color-mix(in srgb, var(--shell) 12%, transparent);
+
+    /* The hero and its span sit over the timelapse video behind a navy scrim,
+       so text there stays light regardless of the paper page theme. */
+    --over-video: #FBFAF7;
+    --over-video-soft: color-mix(in srgb, #FBFAF7 82%, #0D2230);
 
     /* --- type --- */
     --display: "Bricolage Grotesque", "Bricolage Grotesque Fallback", system-ui, sans-serif;
@@ -73,11 +81,6 @@
     --t-body:    clamp(1rem, 1.6vw, 1.125rem);
     --t-mono:    0.875rem;
     --t-eyebrow: 0.75rem;
-
-    /* How much scrolling the timelapse is stretched across. The first 100dvh
-       is the hero at rest, the remainder is the scrub. Kept shorter on phones
-       so reaching the agenda is not a chore. */
-    --hero-track: 260vh;
 
     /* --- rhythm --- */
     --gutter: clamp(1.25rem, 5vw, 4.5rem);
@@ -207,26 +210,48 @@
  * ============================================================ */
 @layer components {
 
-  /* ---------- hero ----------
-     The hero is a tall scroll track. The stage inside it pins for the length
-     of that track, and progress through the track scrubs the timelapse, so
-     the clip plays forwards as you scroll down and backwards as you scroll up.
+  /* ---------- hero + the shorebreak span ----------
+     The timelapse lives in its own pinned layer (.shorebreak__media) that
+     stays put for the whole .shorebreak span: the hero AND Getting there.
+     The words scroll away over the top of it like any other content, the
+     water keeps moving behind them, and scroll progress through the span
+     drives the clip's currentTime, forwards on the way down and backwards
+     on the way up. The media layer releases itself the moment the span
+     ends because it is sticky inside it, no JS unpinning.
 
-     Default state is "fallback": a plain 100dvh hero showing the drawn
-     sunrise. The tall track is only introduced once the video reports usable
-     metadata, so a browser that cannot play it never gets empty scroll. */
-  .hero {
-    position: relative;
+     Default state is "fallback": the media layer sits absolutely behind the
+     hero only, showing the drawn sunrise, and Getting there is a plain
+     paper band. Nothing pins, so a browser that cannot play the video
+     never gets a dead pinned screen. */
+  .shorebreak { position: relative; }
+
+  /* The media container covers the hero only by default; in video mode it
+     stretches over the whole span and the frame inside it pins. A sticky
+     frame inside an absolute full-height container releases exactly at the
+     container's bottom edge, which is what ends the pin after Getting
+     there. (A negative bottom margin on the sticky element itself would
+     extend its travel past the span by the same amount and never release.) */
+  .shorebreak__media {
+    position: absolute;
+    inset: 0 0 auto 0;
     height: 100dvh;
+    z-index: 0;
   }
-  .hero[data-render="video"] { height: var(--hero-track); }
-
-  .hero__stage {
+  .shorebreak[data-render="video"] .shorebreak__media {
+    inset: 0;
+    height: auto;
+  }
+  .shorebreak__frame {
     position: sticky;
     top: 0;
     height: 100dvh;
     overflow: hidden;
-    isolation: isolate;
+  }
+  /* everything else in the span scrolls above the pinned media */
+  .shorebreak > :not(.shorebreak__media) { position: relative; z-index: 1; }
+
+  .hero {
+    min-height: 100dvh;
     display: grid;
     align-items: end;
   }
@@ -235,12 +260,12 @@
     position: absolute; inset: 0;
     width: 100%; height: 100%;
     object-fit: cover;
-    z-index: -2;
+    z-index: 1;
   }
   /* The drawn sunrise sits permanently behind the video, so it covers the
      gap before the first frame decodes as well as outright failure. */
-  .hero__fallback { z-index: -3; }
-  .hero[data-render="fallback"] .hero__video { display: none; }
+  .hero__fallback { z-index: 0; }
+  .shorebreak[data-render="fallback"] .hero__video { display: none; }
 
   /* On a narrow phone, cover forces the 1280x720 source to stretch by
      whichever axis needs it more to fill a roughly 9:19.5 box, here the
@@ -263,16 +288,18 @@
     }
   }
 
-  /* Scrim so the sand-coloured type holds AA over the brightest frames. */
-  .hero__stage::after {
+  /* Scrim so the light type holds AA over the brightest frames. Deep banner
+     navy, deliberately NOT the paper tokens: the hero is the one place on
+     the page that stays dark, because it sits over moving water. */
+  .shorebreak__frame::after {
     content: "";
-    position: absolute; inset: 0; z-index: -1;
+    position: absolute; inset: 0; z-index: 2;
     background: linear-gradient(
       to top,
-      color-mix(in srgb, var(--casuarina) 94%, transparent) 0%,
-      color-mix(in srgb, var(--casuarina) 74%, transparent) 26%,
-      color-mix(in srgb, var(--casuarina) 12%, transparent) 58%,
-      transparent 100%);
+      rgba(13, 34, 48, .94) 0%,
+      rgba(13, 34, 48, .72) 26%,
+      rgba(13, 34, 48, .16) 58%,
+      rgba(13, 34, 48, .18) 100%);
     pointer-events: none;
   }
 
@@ -283,22 +310,50 @@
     margin-inline: auto;
     width: 100%;
   }
-  .hero h1 { color: var(--foam); margin-bottom: .5rem; }
-  .hero__tagline {
-    font-family: var(--display);
-    font-size: clamp(1.05rem, 2.6vw, 1.6rem);
-    font-variation-settings: "wdth" 88;
-    color: var(--lowsun);
-    margin-bottom: 1.4rem;
-    max-width: 30ch;
+  .hero h1 { color: var(--over-video); margin-bottom: .5rem; }
+
+  .hero__badge {
+    width: clamp(56px, 7vw, 76px); height: auto;
+    display: block;
+    margin-bottom: 1.1rem;
+    border-radius: 50%;
+    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .6);
   }
+
+  .hero__motto {
+    color: var(--over-video-soft);
+    letter-spacing: .14em;
+    font-size: .8rem;
+    margin: .2rem 0 1.1rem;
+  }
+
+  /* The four themes off the event banner. Static markup, quiet pills. */
+  .themes {
+    list-style: none;
+    display: flex; flex-wrap: wrap;
+    gap: .55rem .6rem;
+    padding: 0; margin: 0 0 1.6rem;
+  }
+  .themes li {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .5rem .95rem;
+    border: 1px solid rgba(251, 250, 247, .28);
+    border-radius: var(--r-pill);
+    background: rgba(13, 34, 48, .35);
+    color: var(--over-video);
+    font-family: var(--display);
+    font-variation-settings: "wdth" 92;
+    font-size: clamp(.92rem, 1.9vw, 1.05rem);
+  }
+  .themes svg { width: 1.1em; height: 1.1em; flex: none; color: var(--gold); }
+
   .hero__facts {
     display: flex; flex-wrap: wrap;
     align-items: baseline;
     gap: .6rem 1.5rem;
-    color: var(--shell);
+    color: var(--over-video-soft);
   }
-  .hero__facts .sep { color: var(--ink-faint); }
+  .hero__facts .sep { color: rgba(251, 250, 247, .4); }
   /* Below 560px the three facts stack. Wrapping them left the countdown
      flush against the right edge with an orphaned separator. */
   @media (max-width: 560px) {
@@ -307,9 +362,25 @@
   }
   .hero__count {
     display: inline-flex; align-items: baseline; gap: .45rem;
-    color: var(--lowsun);
+    color: var(--gold);
   }
   .hero__count b { font-weight: 500; font-size: 1.05rem; }
+
+  /* While the media layer is pinned behind it, Getting there floats as a
+     paper panel over the moving water. In fallback mode this rule never
+     applies and the section is an ordinary paper band. */
+  .shorebreak[data-render="video"] #getting-there {
+    max-width: min(1560px, calc(100% - 2 * var(--gutter)));
+    margin-inline: auto;
+    margin-bottom: clamp(3rem, 8vh, 6rem);
+    background: var(--casuarina);
+    border-radius: var(--r-shell);
+    box-shadow: 0 40px 90px -40px rgba(13, 34, 48, .55);
+    padding-block: clamp(3rem, 6vh, 5rem);
+  }
+  /* the tideline between hero and panel reads as foam on the water itself,
+     so its wet-sand trace is turned off while the media is pinned */
+  .shorebreak[data-render="video"] .tideline::after { display: none; }
 
   /* ---------- the tideline: the signature ----------
      A foam edge that advances and recedes at every section boundary,
@@ -511,7 +582,8 @@
     position: absolute; left: 1rem; bottom: 1rem;
     font-family: var(--mono); font-size: .68rem;
     text-transform: uppercase; letter-spacing: .14em;
-    color: var(--ink-faint);
+    /* sits on the drawn navy horizon, not the paper page */
+    color: rgba(251, 250, 247, .78);
   }
 
   /* A quiet supplementary strip, not a second hero moment: real photos,
@@ -540,14 +612,15 @@
   .gallery__item::after {
     content: "";
     position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(10,20,18,.6), transparent 55%);
+    background: linear-gradient(to top, rgba(13,34,48,.62), transparent 55%);
     pointer-events: none;
   }
   .gallery__cap {
     position: absolute; left: .85rem; bottom: .65rem; z-index: 1;
     font-family: var(--mono); font-size: .68rem;
     text-transform: uppercase; letter-spacing: .12em;
-    color: var(--foam);
+    /* over the photo's navy scrim, not the paper page, so stays light */
+    color: var(--over-video);
   }
   @media (max-width: 768px) {
     .gallery {
@@ -703,9 +776,11 @@
     padding: 2.5rem var(--gutter) 3.5rem;
     max-width: 1560px; margin-inline: auto;
     display: flex; flex-wrap: wrap; gap: 1rem 2rem;
-    align-items: baseline; justify-content: space-between;
+    align-items: center; justify-content: space-between;
     color: var(--ink-faint);
   }
+  .foot__brand { display: inline-flex; align-items: center; gap: .7rem; }
+  .foot__badge { border-radius: 50%; display: block; }
 
   /* ---------- quick jump ----------
      The concession that keeps a scrollytelling page usable as a
@@ -720,20 +795,19 @@
     border: 1px solid var(--hairline);
     border-radius: var(--r-shell);
     padding: .45rem;
-    box-shadow: 0 30px 70px -30px #000;
+    box-shadow: 0 30px 70px -30px rgba(13, 34, 48, .45);
     opacity: 0; transform: translateY(10px) scale(.97);
     transition: opacity .34s var(--ease-soft), transform .34s var(--ease-soft), visibility .34s;
     visibility: hidden;
   }
   .jump[data-open="true"] .jump__panel { opacity: 1; transform: none; visibility: visible; }
   .jump__panel a {
-    display: flex; justify-content: space-between; gap: 1.5rem; align-items: baseline;
+    display: flex; align-items: baseline;
     padding: .6rem .85rem; border-radius: var(--r-core);
     text-decoration: none; color: var(--shell);
     transition: background-color .26s var(--ease-out), color .26s var(--ease-out);
   }
   .jump__panel a:hover { background: color-mix(in srgb, var(--shell) 8%, transparent); color: var(--foam); }
-  .jump__panel a span:last-child { font-family: var(--mono); font-size: .68rem; color: var(--ink-faint); letter-spacing: .1em; }
 
   .jump__btn {
     display: inline-flex; align-items: center; gap: .55rem;
@@ -794,6 +868,18 @@
   .reveal.is-in { opacity: 1; transform: none; }
   .reveal { transition: opacity .9s var(--ease-soft), transform .9s var(--ease-soft); }
 
+  /* Directional variants: the Venue photos pop in from their own side.
+     Same two-path system as .reveal, just a different start transform. */
+  .reveal--left  { transform: translateX(-48px); }
+  .reveal--right { transform: translateX(48px); }
+  .reveal--left.is-in, .reveal--right.is-in { transform: none; }
+  /* On phones the gallery is a horizontal carousel; sideways entrances
+     fight it, so they fall back to the plain vertical rise there. */
+  @media (max-width: 720px) {
+    .gallery .reveal--left, .gallery .reveal--right { transform: translateY(26px); }
+    .gallery .reveal--left.is-in, .gallery .reveal--right.is-in { transform: none; }
+  }
+
   @supports (animation-timeline: view()) {
     @media (prefers-reduced-motion: no-preference) {
       .reveal {
@@ -802,9 +888,24 @@
         animation-timeline: view();
         animation-range: entry 5% entry 55%;
       }
+      .reveal--left  { animation-name: rise-left; }
+      .reveal--right { animation-name: rise-right; }
       @keyframes rise {
         from { opacity: 0; transform: translateY(26px); }
         to   { opacity: 1; transform: none; }
+      }
+      @keyframes rise-left {
+        from { opacity: 0; transform: translateX(-48px); }
+        to   { opacity: 1; transform: none; }
+      }
+      @keyframes rise-right {
+        from { opacity: 0; transform: translateX(48px); }
+        to   { opacity: 1; transform: none; }
+      }
+      /* Inside the phone-width horizontal gallery carousel a sideways slide
+         fights the scroller, so those fall back to the plain rise. */
+      @media (max-width: 720px) {
+        .gallery .reveal--left, .gallery .reveal--right { animation-name: rise; }
       }
       /* the tideline sweep, tied to the boundary's own position */
       .tideline svg {
@@ -833,14 +934,26 @@
 
 <a class="skip" href="#getting-there">Skip to the joining details</a>
 
+<!-- Theme icons: Phosphor Icons (MIT), users-three / target / handshake / trophy. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <path id="ic-collaborate" d="M244.8,150.4a8,8,0,0,1-11.2-1.6A51.6,51.6,0,0,0,192,128a8,8,0,0,1-7.37-4.89,8,8,0,0,1,0-6.22A8,8,0,0,1,192,112a24,24,0,1,0-23.24-30,8,8,0,1,1-15.5-4A40,40,0,1,1,219,117.51a67.94,67.94,0,0,1,27.43,21.68A8,8,0,0,1,244.8,150.4ZM190.92,212a8,8,0,1,1-13.84,8,57,57,0,0,0-98.16,0,8,8,0,1,1-13.84-8,72.06,72.06,0,0,1,33.74-29.92,48,48,0,1,1,58.36,0A72.06,72.06,0,0,1,190.92,212ZM128,176a32,32,0,1,0-32-32A32,32,0,0,0,128,176ZM72,120a8,8,0,0,0-8-8A24,24,0,1,1,87.24,82a8,8,0,1,0,15.5-4A40,40,0,1,0,37,117.51,67.94,67.94,0,0,0,9.6,139.19a8,8,0,1,0,12.8,9.61A51.6,51.6,0,0,1,64,128,8,8,0,0,0,72,120Z"/>
+    <path id="ic-commit" d="M221.87,83.16A104.1,104.1,0,1,1,195.67,49l22.67-22.68a8,8,0,0,1,11.32,11.32l-96,96a8,8,0,0,1-11.32-11.32l27.72-27.72a40,40,0,1,0,17.87,31.09,8,8,0,1,1,16-.9,56,56,0,1,1-22.38-41.65L184.3,60.39a87.88,87.88,0,1,0,23.13,29.67,8,8,0,0,1,14.44-6.9Z"/>
+    <path id="ic-connect" d="M254.3,107.91,228.78,56.85a16,16,0,0,0-21.47-7.15L182.44,62.13,130.05,48.27a8.14,8.14,0,0,0-4.1,0L73.56,62.13,48.69,49.7a16,16,0,0,0-21.47,7.15L1.7,107.9a16,16,0,0,0,7.15,21.47l27,13.51,55.49,39.63a8.06,8.06,0,0,0,2.71,1.25l64,16a8,8,0,0,0,7.6-2.1l55.07-55.08,26.42-13.21a16,16,0,0,0,7.15-21.46Zm-54.89,33.37L165,113.72a8,8,0,0,0-10.68.61C136.51,132.27,116.66,130,104,122L147.24,80h31.81l27.21,54.41ZM41.53,64,62,74.22,36.43,125.27,16,115.06Zm116,119.13L99.42,168.61l-49.2-35.14,28-56L128,64.28l9.8,2.59-45,43.68-.08.09a16,16,0,0,0,2.72,24.81c20.56,13.13,45.37,11,64.91-5L188,152.66Zm62-57.87-25.52-51L214.47,64,240,115.06Zm-87.75,92.67a8,8,0,0,1-7.75,6.06,8.13,8.13,0,0,1-1.95-.24L80.41,213.33a7.89,7.89,0,0,1-2.71-1.25L51.35,193.26a8,8,0,0,1,9.3-13l25.11,17.94L126,208.24A8,8,0,0,1,131.82,217.94Z"/>
+    <path id="ic-celebrate" d="M232,64H208V48a8,8,0,0,0-8-8H56a8,8,0,0,0-8,8V64H24A16,16,0,0,0,8,80V96a40,40,0,0,0,40,40h3.65A80.13,80.13,0,0,0,120,191.61V216H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V191.58c31.94-3.23,58.44-25.64,68.08-55.58H208a40,40,0,0,0,40-40V80A16,16,0,0,0,232,64ZM48,120A24,24,0,0,1,24,96V80H48v32q0,4,.39,8Zm144-8.9c0,35.52-29,64.64-64,64.9a64,64,0,0,1-64-64V56H192ZM232,96a24,24,0,0,1-24,24h-.5a81.81,81.81,0,0,0,.5-8.9V80h24Z"/>
+  </defs>
+</svg>
+
 <!-- ============================================================ *
- * S0 · HERO
+ * S0 · HERO + GETTING THERE, sharing the pinned timelapse
  * ============================================================ -->
-<header class="hero" id="hero" data-render="fallback">
- <div class="hero__stage">
+<div class="shorebreak" data-shorebreak data-render="fallback">
+
+ <div class="shorebreak__media">
+ <div class="shorebreak__frame">
   <!-- Scroll-scrubbed timelapse. Never played: the script drives currentTime
-       from scroll position. muted + playsinline are what let mobile browsers
-       decode it at all without a tap. -->
+       from scroll position across the whole shorebreak span. muted +
+       playsinline are what let mobile browsers decode it at all without a tap. -->
   <video class="hero__video" data-hero-video
          src="./media/hero.mp4"
          muted playsinline webkit-playsinline preload="auto"
@@ -851,24 +964,24 @@
   <svg class="hero__fallback" viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
     <defs>
       <linearGradient id="fbSky" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#132E2B"/>
-        <stop offset="62%"  stop-color="#22514A"/>
-        <stop offset="100%" stop-color="#E8B75B"/>
+        <stop offset="0%"   stop-color="#0D2230"/>
+        <stop offset="62%"  stop-color="#136B75"/>
+        <stop offset="100%" stop-color="#D6B594"/>
       </linearGradient>
       <linearGradient id="fbSea" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%"   stop-color="#3C7B72"/>
-        <stop offset="100%" stop-color="#10201F"/>
+        <stop offset="0%"   stop-color="#2A8494"/>
+        <stop offset="100%" stop-color="#0D2230"/>
       </linearGradient>
       <radialGradient id="fbGlow">
-        <stop offset="0%"   stop-color="#F2C14E" stop-opacity=".85"/>
-        <stop offset="100%" stop-color="#F2C14E" stop-opacity="0"/>
+        <stop offset="0%"   stop-color="#D9A441" stop-opacity=".85"/>
+        <stop offset="100%" stop-color="#D9A441" stop-opacity="0"/>
       </radialGradient>
     </defs>
     <rect width="1200" height="404" fill="url(#fbSky)"/>
     <circle cx="640" cy="404" r="260" fill="url(#fbGlow)"/>
-    <circle cx="640" cy="396" r="46" fill="#F8D77E"/>
+    <circle cx="640" cy="396" r="46" fill="#E8C988"/>
     <rect y="400" width="1200" height="400" fill="url(#fbSea)"/>
-    <g fill="#F2C14E" opacity=".5">
+    <g fill="#D9A441" opacity=".5">
       <rect x="596" y="430" width="88"  height="2" rx="1"/>
       <rect x="574" y="470" width="132" height="2" rx="1"/>
       <rect x="548" y="516" width="184" height="3" rx="1.5"/>
@@ -877,10 +990,21 @@
       <rect x="418" y="722" width="444" height="4" rx="2"/>
     </g>
   </svg>
+ </div>
+ </div>
 
+ <header class="hero" id="hero">
   <div class="hero__inner">
+    <img class="hero__badge" src="./img/dfn-badge.webp" alt="DFN'26 club crest" width="76" height="76">
     <h1>Development Finance Teambuilding 2026</h1>
-    <p class="hero__tagline" data-tagline>Three days east, where the sun comes up out of the sea.</p>
+    <p class="hero__motto mono">ONE TEAM. ONE GOAL. ONE DFN.</p>
+    <!-- The four themes, straight off the event banner. Phosphor icons (MIT). -->
+    <ul class="themes">
+      <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><use href="#ic-collaborate"/></svg>Collaborate</li>
+      <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><use href="#ic-commit"/></svg>Commit</li>
+      <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><use href="#ic-connect"/></svg>Connect</li>
+      <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><use href="#ic-celebrate"/></svg>Celebrate</li>
+    </ul>
     <div class="hero__facts mono">
       <span>12-14 AUG 2026</span>
       <span class="sep">/</span>
@@ -889,19 +1013,16 @@
       <span class="hero__count" data-countdown><b>&nbsp;</b></span>
     </div>
   </div>
- </div>
-</header>
+ </header>
 
 <noscript>
-  <p class="ns"><b>Report at 7:30 AM on Wednesday 12 August</b> at PETRONAS Twin Towers, KLCC. The coach departs at 8:00 AM.
+  <p class="ns"><b>We meet at 7:30 AM on Wednesday 12 August</b> at KLCC Twin Towers. The coach heads out at 8:00 AM.
   The full agenda, packing checklist and organiser contacts on this page need JavaScript enabled. If you cannot enable it,
   ask the committee for the PDF version.</p>
 </noscript>
 
-<main>
-
 <!-- ============================================================ *
- * S1 · GETTING THERE
+ * S1 · GETTING THERE (still inside the shorebreak span)
  * ============================================================ -->
 <div class="tideline" data-tide aria-hidden="true">
   <svg viewBox="0 0 2400 140" preserveAspectRatio="none">
@@ -914,18 +1035,18 @@
   <div class="grid">
     <div class="col-travel-a reveal">
       <div class="head">
-        <h2 id="h-travel">KLCC to Desaru</h2>
+        <h2 id="h-travel">Getting there</h2>
       </div>
 
       <div class="callout-time">
         <span class="big">7:30 AM</span>
-        <p class="cap">Report at PETRONAS Twin Towers, KLCC on Wednesday 12 August. One coach, roughly four hours.</p>
+        <p class="cap">We gather at KLCC Twin Towers on Wednesday 12 August. One coach, roughly four hours, straight to the beach.</p>
       </div>
 
       <div class="leg">
         <span class="leg__time mono">8:00 AM</span>
-        <span class="leg__what">Coach departs</span>
-        <span class="leg__where">If you are not on it, it goes without you.</span>
+        <span class="leg__what">Coach rolls out</span>
+        <span class="leg__where">One coach for the whole crew, so don't miss it.</span>
       </div>
       <div class="leg">
         <span class="leg__time mono">3:00 PM</span>
@@ -936,28 +1057,28 @@
       <div class="rules">
         <div class="rule rule--lead">
           <strong>One luggage, one carry-on.</strong>
-          <span>That is the limit, not a guideline. The coach has the space it has.</span>
+          <span>One bag and one carry-on each keeps the coach happy. It has the space it has.</span>
         </div>
         <div class="rule">
-          <strong>Be on time.</strong>
-          <span>The coach leaves as planned so the schedule holds for everyone.</span>
+          <strong>See you bright and early.</strong>
+          <span>The coach keeps to time so the whole day stays easy for everyone.</span>
         </div>
         <div class="rule">
           <strong>Car sickness?</strong>
-          <span>Bring your own medication. It is a four hour drive.</span>
+          <span>Pop your usual medication in your bag. It is a four hour drive.</span>
         </div>
       </div>
     </div>
 
     <div class="col-travel-b reveal">
-      <svg class="route" viewBox="0 0 300 420" role="img" aria-label="Route from PETRONAS Twin Towers KLCC south east to Sand and Sandals Desaru, roughly four hours by coach.">
+      <svg class="route" viewBox="0 0 300 420" role="img" aria-label="Route from KLCC Twin Towers south east to Sand and Sandals Desaru, roughly four hours by coach.">
         <path class="path" data-route
               d="M46,46 C46,124 104,148 128,206 C152,264 96,296 108,342 C120,386 178,392 236,374"/>
 
         <circle class="ring" cx="46" cy="46" r="12"/>
         <circle class="stop" cx="46" cy="46" r="4.5"/>
         <text x="68" y="42">KLCC</text>
-        <text class="sub" x="68" y="59">PETRONAS TWIN TOWERS</text>
+        <text class="sub" x="68" y="59">TWIN TOWERS</text>
 
         <!-- duration annotation, tied to the path with a tick rather than floating -->
         <line class="tick" x1="132" y1="214" x2="160" y2="214"/>
@@ -974,6 +1095,10 @@
   </div>
 </section>
 
+</div><!-- /.shorebreak: the pinned timelapse releases here -->
+
+<main>
+
 <!-- ============================================================ *
  * S2 · AGENDA
  * ============================================================ -->
@@ -988,8 +1113,7 @@
   <div class="grid">
     <div class="col-agenda">
       <div class="head reveal">
-        <h2 id="h-agenda">Three days</h2>
-        <p class="lead">Where there is a gap in the day, it is named rather than left blank.</p>
+        <h2 id="h-agenda">Agenda</h2>
       </div>
       <div data-agenda></div>
     </div>
@@ -1008,22 +1132,22 @@
 
 <section class="band" id="the-stay" aria-labelledby="h-stay">
   <div class="grid">
-    <div class="col-stay-a reveal">
+    <div class="col-stay-a reveal reveal--left">
       <figure class="stay__figure" data-asset="resortExterior" data-asset-key="resortExterior"
               data-asset-alt="An elevated view of Sand &amp; Sandals Desaru Beach Resort, showing the main pool and guest room blocks.">
         <svg class="slot-empty" viewBox="0 0 800 500" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
           <defs>
             <linearGradient id="phSky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#16352F"/><stop offset="100%" stop-color="#2E6B60"/>
+              <stop offset="0%" stop-color="#0D2230"/><stop offset="100%" stop-color="#136B75"/>
             </linearGradient>
             <linearGradient id="phSea" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#357069"/><stop offset="100%" stop-color="#132E2B"/>
+              <stop offset="0%" stop-color="#2A8494"/><stop offset="100%" stop-color="#0D2230"/>
             </linearGradient>
           </defs>
           <rect width="800" height="286" fill="url(#phSky)"/>
           <rect y="284" width="800" height="216" fill="url(#phSea)"/>
-          <circle cx="252" cy="284" r="28" fill="none" stroke="#F2C14E" stroke-width="2" opacity=".5"/>
-          <g fill="#EDE3D2" opacity=".1">
+          <circle cx="252" cy="284" r="28" fill="none" stroke="#D9A441" stroke-width="2" opacity=".5"/>
+          <g fill="#FBFAF7" opacity=".18">
             <rect x="150" y="330" width="200" height="2" rx="1"/>
             <rect x="80"  y="392" width="320" height="2" rx="1"/>
             <rect x="450" y="360" width="230" height="2" rx="1"/>
@@ -1033,9 +1157,9 @@
       </figure>
     </div>
 
-    <div class="col-stay-b reveal">
+    <div class="col-stay-b reveal reveal--right">
       <div class="head">
-        <h2 id="h-stay">The stay</h2>
+        <h2 id="h-stay">Venue</h2>
       </div>
       <dl class="facts">
         <div class="fact"><dt>Resort</dt><dd>Sand &amp; Sandals Desaru Beach Resort &amp; Spa</dd></div>
@@ -1055,21 +1179,23 @@
       </div>
     </div>
 
-    <div class="col-gallery reveal">
+    <div class="col-gallery">
+      <!-- Each photo pops in from its own side as it scrolls into view,
+           alternating left / right / left / right. -->
       <ul class="gallery" data-gallery>
-        <li class="gallery__item gallery__item--wide" data-asset="beachWide" data-asset-key="beachWide"
+        <li class="gallery__item gallery__item--wide reveal reveal--left" data-asset="beachWide" data-asset-key="beachWide"
             data-asset-mode="prepend" data-asset-alt="The resort's beach, with a shade tree and thatched-roof hut on the sand.">
           <span class="gallery__cap">Beachfront</span>
         </li>
-        <li class="gallery__item" data-asset="poolDeck" data-asset-key="poolDeck"
+        <li class="gallery__item reveal reveal--right" data-asset="poolDeck" data-asset-key="poolDeck"
             data-asset-mode="prepend" data-asset-alt="The resort's lagoon-style pool and swim-up bar.">
           <span class="gallery__cap">Pool</span>
         </li>
-        <li class="gallery__item" data-asset="roomInterior" data-asset-key="roomInterior"
+        <li class="gallery__item reveal reveal--left" data-asset="roomInterior" data-asset-key="roomInterior"
             data-asset-mode="prepend" data-asset-alt="A guest room interior with an ensuite vanity.">
           <span class="gallery__cap">Room</span>
         </li>
-        <li class="gallery__item" data-asset="meetingRoom" data-asset-key="meetingRoom"
+        <li class="gallery__item reveal reveal--right" data-asset="meetingRoom" data-asset-key="meetingRoom"
             data-asset-mode="prepend" data-asset-alt="A meeting room set up classroom-style with a projector screen.">
           <span class="gallery__cap">Meeting space</span>
         </li>
@@ -1092,7 +1218,7 @@
   <div class="grid">
     <div class="col-pack reveal">
       <div class="head">
-        <h2 id="h-pack" data-pack-head>Pack this</h2>
+        <h2 id="h-pack" data-pack-head>Packing list</h2>
       </div>
 
       <p class="dress"><b>Smart casual.</b> Comfortable shoes, there are games. Bring a jacket if you feel the cold.</p>
@@ -1126,13 +1252,13 @@
   <div class="grid">
     <div class="col-safety">
       <div class="head reveal">
-        <h2 id="h-safety">Safety and who to call</h2>
+        <h2 id="h-safety">HSE</h2>
       </div>
 
       <div class="safety-grid">
         <div class="reveal">
           <p class="block__name">Before you come</p>
-          <p class="hardrule">Do not travel if you have a fever, cough, sore throat or shortness of breath.</p>
+          <p class="hardrule">Feeling feverish, coughing, or short of breath? Please rest up at home and sit this one out.</p>
 
           <!-- TODO (B4, B5): Pengerang site-visit requirements and the Friday
                prayer arrangement drop in here. It sits in the left column so it
@@ -1149,10 +1275,10 @@
           <div class="block">
             <p class="block__name">While you are there</p>
             <ul class="quiet-list">
-              <li>Wear a 3-ply face mask in common areas.</li>
+              <li>A 3-ply face mask in common areas is a kind habit.</li>
               <li>Wash and sanitise your hands often.</li>
               <li>Cover your mouth when you cough or sneeze.</li>
-              <li>Use contactless greetings.</li>
+              <li>Contactless greetings work great.</li>
             </ul>
           </div>
 
@@ -1160,8 +1286,8 @@
             <p class="block__name">Good to know</p>
             <ul class="quiet-list">
               <li>The committee photographs throughout, with a group photo at the end of each event.</li>
-              <li>Event content is confidential. Please do not share it outside the event.</li>
-              <li>You are encouraged to bring your own prayer mat and telekung.</li>
+              <li>What happens at Desaru stays at Desaru. Please keep event content within the team.</li>
+              <li>Feel free to bring your own prayer mat and telekung.</li>
             </ul>
           </div>
 
@@ -1179,19 +1305,22 @@
 </main>
 
 <footer class="foot">
-  <span class="mono">INTERNAL &middot; PETRONAS DEVELOPMENT FINANCE</span>
+  <span class="foot__brand">
+    <img class="foot__badge" src="./img/dfn-badge.webp" alt="" width="28" height="28">
+    <span class="mono">DFN'26 &middot; ONE TEAM. ONE GOAL. ONE DFN.</span>
+  </span>
   <span class="mono">DEVELOPMENT FINANCE TEAMBUILDING 2026 &middot; DESARU</span>
 </footer>
 
 <!-- quick jump -->
 <nav class="jump" data-jump data-open="false" aria-label="Jump to a section">
   <div class="jump__panel" id="jump-panel">
-    <a href="#getting-there"><span>Getting there</span><span>7:30 AM</span></a>
-    <a href="#agenda"><span>Three days</span><span>AGENDA</span></a>
-    <a href="#the-stay"><span>The stay</span><span>RESORT</span></a>
-    <a href="#pack"><span>Pack this</span><span>CHECKLIST</span></a>
-    <a href="#safety"><span>Safety</span><span>HSE</span></a>
-    <a href="#hero"><span>Back to the top</span><span>TOP</span></a>
+    <a href="#getting-there"><span>Getting there</span></a>
+    <a href="#agenda"><span>Agenda</span></a>
+    <a href="#the-stay"><span>Venue</span></a>
+    <a href="#pack"><span>Packing list</span></a>
+    <a href="#safety"><span>HSE</span></a>
+    <a href="#hero"><span>Back to the top</span></a>
   </div>
   <button class="jump__btn" data-jump-btn aria-expanded="false" aria-controls="jump-panel">
     Jump to
@@ -1209,10 +1338,9 @@
 
 const EVENT = {
   title:   "Development Finance Teambuilding 2026",
-  /* PLACEHOLDER. This line was written to fill the hero, not supplied by the
-     committee. Replace it with the real event theme when there is one, or set
-     it to "" to drop the line entirely. */
-  tagline: "Three days east, where the sun comes up out of the sea.",
+  /* The hero shows the club motto and the four themes as static markup now.
+     Setting a tagline here would print it back above the facts line. */
+  tagline: "",
   venue:   "Sand & Sandals Desaru Beach Resort & Spa",
   address: "Bandar Penawar, 81930 Kota Tinggi, Johor",
   start:   "2026-08-12T07:30:00+08:00",
@@ -1242,16 +1370,16 @@ const AGENDA = [
     day: "Day 1", date: "Wed 12 Aug", id: "d1",
     note: "Travel down, check in, and straight into the first session.",
     items: [
-      { time: "7:30 AM",  event: "Report at PETRONAS Twin Towers, KLCC", pic: "PETRONAS" },
-      { time: "8:00 AM",  event: "Coach departs for Desaru",             pic: "PETRONAS" },
-      { time: "12:30 PM", event: "Lunch",                                pic: "PETRONAS", note: "Location to be confirmed, most likely a stop en route.", confirm: true },
+      { time: "7:30 AM",  event: "Meet at KLCC Twin Towers",         pic: "Everyone" },
+      { time: "8:00 AM",  event: "Coach rolls out for Desaru",       pic: "Everyone" },
+      { time: "12:30 PM", event: "Lunch",                            pic: "Everyone" },
       { gap: "In transit" },
-      { time: "3:00 PM",  event: "Hotel check-in",                       pic: "PETRONAS" },
-      { time: "3:30 PM",  event: "PETRONAS 2.0 Desired Behaviours",      pic: "PETRONAS & Trainer" },
-      { time: "4:30 PM",  event: "Team Building Slot 1",                 pic: "Trainer" },
-      { time: "7:30 PM",  event: "Dinner",                               pic: "Hotel" },
-      { time: "8:30 PM",  event: "Team Building Slot 2",                 pic: "Trainer" },
-      { time: "9:00 PM",  event: "KPI and S&I Check-In",                 pic: "KPI Focal" }
+      { time: "3:00 PM",  event: "Hotel check-in",                   pic: "Everyone" },
+      { time: "3:30 PM",  event: "Desired Behaviours workshop",      pic: "Everyone & Trainer" },
+      { time: "4:30 PM",  event: "Team Building Slot 1",             pic: "Trainer" },
+      { time: "7:30 PM",  event: "Dinner",                           pic: "Hotel" },
+      { time: "8:30 PM",  event: "Team Building Slot 2",             pic: "Trainer" },
+      { time: "9:00 PM",  event: "KPI and S&I Check-In",             pic: "KPI Focal" }
     ]
   },
   {
@@ -1270,36 +1398,36 @@ const AGENDA = [
     day: "Day 3", date: "Fri 14 Aug", id: "d3", offsite: true,
     note: "The day the group leaves the beach for a live industrial site.",
     items: [
-      { time: "7:00 AM",  event: "Breakfast",                             pic: "Hotel" },
-      { time: "8:30 AM",  event: "Photo session and prepare for checkout", pic: "PETRONAS" },
-      { time: "10:30 AM", event: "Hotel check-out",                       pic: "PETRONAS" },
-      { time: "11:00 AM", event: "Pengerang site visit",                  pic: "PETRONAS", offsite: true, note: "Site requirements and the Friday prayer arrangement will be confirmed.", confirm: true },
-      { time: "3:00 PM",  event: "Depart for KL",                         pic: "PETRONAS", offsite: true, confirm: true },
-      { time: "8:00 PM",  event: "Arrive PETRONAS Twin Towers, KLCC",     pic: "PETRONAS" }
+      { time: "7:00 AM",  event: "Breakfast",                              pic: "Hotel" },
+      { time: "8:30 AM",  event: "Photo session and prepare for checkout", pic: "Everyone" },
+      { time: "10:30 AM", event: "Hotel check-out",                        pic: "Everyone" },
+      { time: "11:00 AM", event: "Pengerang site visit",                   pic: "Everyone", offsite: true, note: "Site details and the Friday prayer arrangement will be confirmed.", confirm: true },
+      { time: "3:00 PM",  event: "Depart for KL",                          pic: "Everyone", offsite: true, confirm: true },
+      { time: "8:00 PM",  event: "Arrive KLCC Twin Towers",                pic: "Everyone" }
     ]
   }
 ];
 
 const PACKING = [
-  { cluster: "Wear",       id: "smartcasual", label: "Smart casual outfits",      note: "Two full days" },
-  { cluster: "Wear",       id: "shoes",       label: "Comfortable shoes",         note: "There are games" },
-  { cluster: "Wear",       id: "jacket",      label: "A jacket",                  note: "If you feel the cold" },
-  { cluster: "Wear",       id: "swim",        label: "Swimwear",                  note: "Free time on Day 2" },
+  { cluster: "Wear",       id: "smartcasual", label: "Smart casual outfits" },
+  { cluster: "Wear",       id: "shoes",       label: "Comfortable shoes" },
+  { cluster: "Wear",       id: "jacket",      label: "A jacket" },
+  { cluster: "Wear",       id: "swim",        label: "Swimwear" },
 
-  { cluster: "Bring",      id: "masks",       label: "3-ply face masks",          note: "For common areas" },
-  { cluster: "Bring",      id: "sanitiser",   label: "Hand sanitiser",            note: "" },
-  { cluster: "Bring",      id: "motionmeds",  label: "Car sickness medication",   note: "If you need it, the drive is four hours" },
-  { cluster: "Bring",      id: "meds",        label: "Any personal medication",   note: "" },
-  { cluster: "Bring",      id: "prayer",      label: "Prayer mat and telekung",   note: "If applicable" },
-  { cluster: "Bring",      id: "sunscreen",   label: "Sunscreen and a cap",       note: "Outdoor games, east coast sun" },
-  { cluster: "Bring",      id: "bottle",      label: "Reusable water bottle",     note: "" },
-  { cluster: "Bring",      id: "charger",     label: "Charger and power bank",    note: "" },
+  { cluster: "Bring",      id: "masks",       label: "3-ply face masks" },
+  { cluster: "Bring",      id: "sanitiser",   label: "Hand sanitiser" },
+  { cluster: "Bring",      id: "motionmeds",  label: "Car sickness medication" },
+  { cluster: "Bring",      id: "meds",        label: "Any personal medication" },
+  { cluster: "Bring",      id: "prayer",      label: "Prayer mat and telekung" },
+  { cluster: "Bring",      id: "sunscreen",   label: "Sunscreen and a cap" },
+  { cluster: "Bring",      id: "bottle",      label: "Reusable water bottle" },
+  { cluster: "Bring",      id: "charger",     label: "Charger and power bank" },
 
-  /* Pending confirmation of the Pengerang site requirements (B5).
+  /* Pending confirmation of the Pengerang site details (B5).
      Set PENGERANG.show to false to hide this cluster entirely. */
-  { cluster: "Site visit", id: "closedtoe",   label: "Closed-toe shoes",          note: "Pengerang site visit" },
-  { cluster: "Site visit", id: "trousers",    label: "Long trousers",             note: "Pengerang site visit" },
-  { cluster: "Site visit", id: "id",          label: "Photo ID or staff pass",    note: "Pengerang site visit" }
+  { cluster: "Site visit", id: "closedtoe",   label: "Closed-toe shoes" },
+  { cluster: "Site visit", id: "trousers",    label: "Long trousers" },
+  { cluster: "Site visit", id: "id",          label: "Photo ID or staff pass" }
 ];
 
 /* Pengerang block in the safety section. Flip `show` to true once the
@@ -1307,7 +1435,7 @@ const PACKING = [
 const PENGERANG = {
   show: false,
   lines: [
-    "Full PPE is required on site. Details to follow.",
+    "PPE comes into play on site. Details to follow.",
     "Friday prayer arrangement to be confirmed."
   ]
 };
@@ -1351,10 +1479,10 @@ const CONTACTS = [
     panel.id = "debug-panel";
     panel.style.cssText = [
       "position:fixed", "left:0", "right:0", "bottom:0", "max-height:46vh",
-      "overflow:auto", "background:color-mix(in srgb, var(--casuarina) 96%, #000)",
-      "color:var(--shell)", "font-family:var(--mono)", "font-size:11px",
+      "overflow:auto", "background:#0D2230",
+      "color:#FBFAF7", "font-family:var(--mono)", "font-size:11px",
       "line-height:1.6", "padding:.6rem .8rem .8rem", "z-index:99999",
-      "white-space:pre-wrap", "border-top:2px solid var(--lowsun)"
+      "white-space:pre-wrap", "border-top:2px solid #D9A441"
     ].join(";");
     document.documentElement.appendChild(panel);
 
@@ -1367,14 +1495,14 @@ const CONTACTS = [
     };
 
     function state() {
-      const v = $("[data-hero-video]"), hero = $("#hero");
-      if (!v || !hero) return "no hero/video element found on this page";
+      const v = $("[data-hero-video]"), sb = $("[data-shorebreak]");
+      if (!v || !sb) return "no shorebreak/video element found on this page";
       const buffered = [];
       for (let i = 0; i < v.buffered.length; i++) {
         buffered.push(v.buffered.start(i).toFixed(2) + "-" + v.buffered.end(i).toFixed(2));
       }
       return [
-        "data-render=" + hero.dataset.render,
+        "data-render=" + sb.dataset.render,
         "src=" + (v.getAttribute("src") || "(removed)"),
         "readyState=" + v.readyState + "  networkState=" + v.networkState,
         "duration=" + v.duration + "  currentTime=" + (v.currentTime || 0).toFixed(2),
@@ -1418,7 +1546,10 @@ const CONTACTS = [
   /* ---------------------------------------------------------- *
    * Tagline + assets
    * ---------------------------------------------------------- */
-  if (EVENT.tagline) $("[data-tagline]").textContent = EVENT.tagline;
+  if (EVENT.tagline) {
+    const t = $("[data-tagline]");
+    if (t) t.textContent = EVENT.tagline;
+  }
 
   $$("[data-asset]").forEach((slot) => {
     const src = ASSETS[slot.dataset.asset];
@@ -1557,7 +1688,6 @@ const CONTACTS = [
             '<span class="check__box" aria-hidden="true">' + tickSvg + "</span>" +
             '<span class="check__text">' +
               '<span class="check__label">' + esc(i.label) + "</span>" +
-              (i.note ? '<span class="check__note">' + esc(i.note) + "</span>" : "") +
             "</span>" +
           "</button>"
         ).join("") +
@@ -1579,7 +1709,7 @@ const CONTACTS = [
 
       if (done === total && !celebrated) {
         celebrated = true;
-        head.textContent = "You are all set. See you at 7:30.";
+        head.textContent = "You are all set. See you there!";
         wrap.classList.add("is-full");
         celebrate(wrap);
       }
@@ -1619,8 +1749,8 @@ const CONTACTS = [
     ctx.scale(dpr, dpr);
 
     const css = getComputedStyle(document.documentElement);
-    const colours = ["--lowsun", "--seagrass", "--shell", "--flare"]
-      .map((t) => css.getPropertyValue(t).trim() || "#F2C14E");
+    const colours = ["--lowsun", "--seagrass", "--gold", "--flare"]
+      .map((t) => css.getPropertyValue(t).trim() || "#D9A441");
 
     const originX = rect.left + rect.width / 2;
     const originY = rect.bottom;
@@ -1750,9 +1880,12 @@ const CONTACTS = [
    * ignore movements smaller than half a frame.
    * ---------------------------------------------------------- */
   (function heroScrub() {
-    const hero  = $("#hero");
+    /* The scrub is measured across the whole shorebreak span (hero AND
+       Getting there), because the media layer stays pinned behind both:
+       the words scroll away, the water keeps moving until the span ends. */
+    const span  = $("[data-shorebreak]");
     const video = $("[data-hero-video]");
-    if (!hero || !video) return;
+    if (!span || !video) return;
 
     // Some browsers only honour the muted ATTRIBUTE reliably once the
     // property is also set from script; without this, autoplay of the brief
@@ -1792,7 +1925,7 @@ const CONTACTS = [
       settled = true;
       clearTimeout(stallTimer);
       stop();
-      hero.setAttribute("data-render", "fallback");
+      span.setAttribute("data-render", "fallback");
       console.warn(
         '[hero] video did not become playable, falling back: ' + reason +
         '\n  networkState=' + video.networkState + ' readyState=' + video.readyState +
@@ -1812,7 +1945,7 @@ const CONTACTS = [
       duration = video.duration;
       if (!duration || !isFinite(duration)) { giveUp("duration is " + duration); return; }
       settled = true;
-      hero.setAttribute("data-render", "video");
+      span.setAttribute("data-render", "video");
 
       /* iOS Safari fetches metadata (readyState 1) and then, even for a
          muted+playsinline video with preload="auto", stops buffering actual
@@ -1851,9 +1984,9 @@ const CONTACTS = [
     }, { once: true });
 
     function progress() {
-      const track = hero.offsetHeight - innerHeight;
+      const track = span.offsetHeight - innerHeight;
       if (track <= 0) return 0;
-      return Math.min(1, Math.max(0, -hero.getBoundingClientRect().top / track));
+      return Math.min(1, Math.max(0, -span.getBoundingClientRect().top / track));
     }
 
     function frame() {
@@ -1867,15 +2000,15 @@ const CONTACTS = [
     function start() { if (running || !duration) return; running = true; raf = requestAnimationFrame(frame); }
     function stop()  { running = false; cancelAnimationFrame(raf); }
 
-    /* The loop only runs while the hero is on screen, so the rest of the
+    /* The loop only runs while the span is on screen, so the rest of the
        page scrolls without a per-frame layout read. */
     new IntersectionObserver((es) => {
       es.forEach((e) => (e.isIntersecting && !document.hidden) ? start() : stop());
-    }, { threshold: 0 }).observe(hero);
+    }, { threshold: 0 }).observe(span);
 
     document.addEventListener("visibilitychange", () => {
       if (document.hidden) stop();
-      else if (hero.getBoundingClientRect().bottom > 0) start();
+      else if (span.getBoundingClientRect().bottom > 0) start();
     });
   })();
 

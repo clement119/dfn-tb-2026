@@ -30,7 +30,7 @@ You should not need to touch the HTML or the CSS.
 
 | Object | What it controls |
 |---|---|
-| `EVENT` | Title, tagline, venue, address, and the start date the countdown counts to |
+| `EVENT` | Title, venue, address, and the start date the countdown counts to. `tagline` is left empty on purpose (see "The hero" below) |
 | `ASSETS` | The photographs (see below) |
 | `AGENDA` | The three days. Each entry is `{ time, event, pic }`, plus optional `note` and `confirm` |
 | `PACKING` | The checklist. `cluster` groups items under "Wear", "Bring" and "Site visit" |
@@ -47,6 +47,33 @@ A few conventions worth knowing:
   of the day that happens away from the resort.
 - Adding an item to `PACKING` automatically updates the progress counter and the
   completion moment. Nothing else needs changing.
+
+---
+
+## The look
+
+The palette, the crest badge and the four themes (Collaborate, Commit, Connect,
+Celebrate) all come from the club's own event banner, not from this page's
+first draft. The colour tokens keep their original names in the CSS (`--shell`,
+`--lowsun`, `--foam` and so on, set near the top of the `<style>` block) so
+retinting again later is a same six-line edit, same as before; only the hex
+values changed, to the banner's paper, navy and teal.
+
+`img/dfn-badge.webp` is a circular crop of the club crest, used in the hero and
+the footer. Swap it for a different file the same way as any other photo below
+if the crest changes.
+
+---
+
+## The hero
+
+Scrolling through the hero and Getting there together keeps one video pinned
+behind both: the words scroll up and out of view as you read, the timelapse
+keeps playing behind them the whole way, and the reveal ends cleanly once
+Getting there is done. `EVENT.tagline` is left as `""` deliberately, the hero
+now carries the club motto and the four themes as fixed text instead of a
+one-line placeholder tagline; setting `tagline` again will print it back in
+above the facts line if a future draft wants it.
 
 ---
 
@@ -79,6 +106,11 @@ venue and the layout doesn't shift when a photo arrives.
 the URL, for example `index.html?assets=debug`. Every image slot is outlined and
 labelled with its key name.
 
+The four gallery photos pop in from alternating sides (left, right, left,
+right) as they scroll into view. That's the same reveal system the rest of the
+page already uses (`.reveal`, see "How it was built"), just with a sideways
+starting position instead of the usual rise-from-below.
+
 While any phone number is still missing, the browser console prints a "Not
 ready to distribute" warning listing exactly what is outstanding. Press F12 to
 see it.
@@ -101,7 +133,7 @@ The page is built so that resolving them is a one-line edit.
 | B4 | The Pengerang visit spans Friday prayers | Not yet answered on the page. See `PENGERANG` below |
 | B5 | Pengerang is a live industrial site, so PPE and site rules apply | Closed-toe shoes, long trousers and photo ID are in the checklist under "Site visit". The safety block is written but hidden |
 | B6 | Unexplained gaps in Days 1 and 2 | Labelled "In transit" and "Free time" rather than left blank |
-| B7 | Day 1 lunch location | Shown as "Location to be confirmed, most likely a stop en route" with a chip |
+| B7 | Day 1 lunch location | Shown simply as "Lunch"; add it back to the `AGENDA` entry once it's settled |
 
 **To publish the Pengerang answer**, edit the `PENGERANG` object:
 
@@ -121,11 +153,6 @@ The block is already positioned in the safety section, so nothing else moves.
 Still outstanding from the committee: headcount, rooming lists, organiser phone
 numbers, and the event photographs.
 
-One more thing to check: **the hero tagline is a placeholder.** The line "Three
-days east, where the sun comes up out of the sea" was written to fill the hero,
-not supplied by the committee. Replace `EVENT.tagline` with the real theme, or
-set it to `""` to drop the line.
-
 ---
 
 ## Distribution
@@ -136,7 +163,8 @@ public marketing site:
 - `noindex, nofollow` is set, so search engines will not list it.
 - There are deliberately **no** Open Graph or Twitter card tags, so a link pasted
   into a group chat will not unfurl into a preview of an internal document.
-- The footer carries an `INTERNAL - PETRONAS DEVELOPMENT FINANCE` marker.
+- The footer carries a quiet `DFN'26 · ONE TEAM. ONE GOAL. ONE DFN.` marker
+  next to the crest badge.
 
 **Send it through an internal channel** (email attachment, SharePoint, Teams)
 rather than putting it on a public URL.
@@ -198,9 +226,9 @@ fails loudly if `media/hero.mp4` is missing, rather than shipping a hero that
   and stays completely readable, just less distinctive.
 - **The hero video needs H.264 support and a real network fetch.** Every current
   browser decodes H.264, but if the file is missing, blocked, or the reader has
-  "reduce motion" turned on, the hero falls back to a drawn sunrise and the tall
-  scroll track collapses to a normal one-screen hero. All three fallback paths
-  are tested.
+  "reduce motion" turned on, the hero falls back to a drawn sunrise, the media
+  layer stops pinning, and Getting there sits on an ordinary paper band. All
+  three fallback paths are tested.
 - **The video is about 3.7 MB**, which is most of the page's weight. Every one
   of its 97 frames is encoded as an independent keyframe rather than the usual
   mix of keyframes and predicted frames, so any scroll position can be decoded
@@ -249,13 +277,15 @@ The fallback reasons themselves, in case the strip or console names one:
 Hand-written CSS and vanilla JavaScript, no framework and no build step, so the
 file keeps working wherever it is opened.
 
-- The hero is a scroll-scrubbed timelapse. The video is never played: scroll
-  position through the hero's tall track is mapped straight onto `currentTime`,
-  so the clip runs forwards as you scroll down and backwards as you scroll up.
-  The scrub loop only runs while the hero is on screen.
+- The hero is a scroll-scrubbed timelapse pinned behind both the hero and
+  Getting there (the `.shorebreak` span). The video is never played: scroll
+  position through that span is mapped straight onto `currentTime`, so the
+  clip runs forwards as you scroll down and backwards as you scroll up, while
+  the words scroll normally on top of it. The scrub loop only runs while the
+  span is on screen.
 - Scroll effects use CSS scroll-driven animations with an `IntersectionObserver`
   fallback. There are no scroll event listeners.
-- The render loop stops when the hero scrolls out of view or the tab is hidden.
+- The render loop stops when the span scrolls out of view or the tab is hidden.
 - Type is Bricolage Grotesque (display), Switzer (body) and Chivo Mono (times and
   dates). The times are set in a monospace face so the figures line up in a
   column and the eye can scan down them.
