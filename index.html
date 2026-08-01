@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, viewport-fit=cover">
 <title>Development Finance Teambuilding 2026 · Desaru · 12-14 Aug</title>
 <meta name="description" content="Joining instructions for Development Finance Teambuilding 2026 at Sand &amp; Sandals Desaru, 12 to 14 August 2026.">
 
@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://api.fontshare.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Chivo+Mono:wght@300;400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,300..800&family=Chivo+Mono:wght@300;400;500&family=Cinzel:wght@500;600;700&display=swap">
 <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f%5B%5D=switzer@400,500,600&display=swap">
 
 <style>
@@ -73,6 +73,7 @@
     --display: "Bricolage Grotesque", "Bricolage Grotesque Fallback", system-ui, sans-serif;
     --body:    "Switzer", "Switzer Fallback", system-ui, sans-serif;
     --mono:    "Chivo Mono", ui-monospace, "SF Mono", "Cascadia Mono", monospace;
+    --suspense: "Cinzel", "Cinzel Fallback", Georgia, serif; /* the one place the site whispers instead of speaking plainly: the treasure-hunt dinner card */
 
     --t-hero:    clamp(2.9rem, 10.5vw, 7.5rem);
     --t-h2:      clamp(1.9rem, 5vw, 3.2rem);
@@ -110,7 +111,7 @@
  * BASE
  * ============================================================ */
 @layer base {
-  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; overflow-x: clip; }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
   body {
@@ -120,7 +121,7 @@
     font-size: var(--t-body);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   h1, h2, h3 { font-family: var(--display); font-weight: 600; text-wrap: balance; }
@@ -414,6 +415,7 @@
   .head { margin-bottom: var(--stack); }
   .head h2 { color: var(--foam); }
   .head .lead { margin-top: .9rem; }
+  .head__note { color: var(--ink-faint); font-size: .85rem; margin-top: .5rem; max-width: 46ch; }
 
   /* ---------- double-bezel container ----------
      Nested enclosure: outer tray, inner plate. Used for every
@@ -529,42 +531,48 @@
   .slot__pic { color: var(--ink-faint); font-size: .82rem; font-family: var(--mono); letter-spacing: .04em; }
   .slot__note { color: var(--ink-muted); font-size: .88rem; }
 
-  /* The one themed moment on the page: the Lost Treasure dinner. Warm
-     parchment, deliberately not the site's teal/paper palette, so it reads
-     as a one-off occasion rather than a new section style. Nothing else on
-     the page uses this treatment. */
+  /* The one themed moment on the page: the Lost Treasure dinner. Stormy
+     navy and old gold, deliberately not the site's paper/teal palette, so
+     it reads as a one-off occasion rather than a new section style.
+     Nothing else on the page uses this treatment. */
   .treasure {
     margin-top: .85rem;
-    display: grid; grid-template-columns: 128px 1fr;
+    display: grid; grid-template-columns: 132px 1fr;
     border-radius: var(--r-core);
     overflow: hidden;
-    background: linear-gradient(135deg, #F4E7C8, #E7CE99);
-    border: 1px solid rgba(94, 66, 25, .3);
+    background: linear-gradient(155deg, #0A1620, #173447 70%, #0A1620);
+    border: 1px solid rgba(216, 181, 106, .35);
+    box-shadow: inset 0 0 40px rgba(0, 0, 0, .35);
   }
-  .treasure__art { display: flex; align-items: center; justify-content: center; padding: .7rem; }
-  .treasure__map { width: 100%; max-width: 112px; height: auto; }
-  .treasure__needle {
-    transform-box: fill-box; transform-origin: center;
-    animation: treasure-spin 22s linear infinite;
+  .treasure__art { position: relative; aspect-ratio: 687 / 1024; overflow: hidden; }
+  .treasure__poster {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: saturate(1.05) contrast(1.02);
   }
-  @keyframes treasure-spin { to { transform: rotate(360deg); } }
-  .treasure__text { display: flex; flex-direction: column; justify-content: center; padding: 1rem 1.15rem 1.1rem .3rem; }
+  .treasure__art::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(90deg, rgba(10, 22, 32, 0) 60%, rgba(10, 22, 32, .55));
+  }
+  .treasure__text { display: flex; flex-direction: column; justify-content: center; padding: 1rem 1.15rem 1.1rem .95rem; }
   .treasure__kicker {
     font-family: var(--mono); font-size: .68rem; text-transform: uppercase;
-    letter-spacing: .14em; color: #77480E; margin-bottom: .3rem;
+    letter-spacing: .16em; color: #D9B36A; margin-bottom: .4rem;
   }
   .treasure__title {
-    font-family: var(--display); font-size: 1.15rem; font-weight: 600;
-    font-variation-settings: "wdth" 90; color: #3A2609; margin-bottom: .35rem;
+    font-family: var(--suspense); font-size: 1.2rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .05em; line-height: 1.25;
+    color: #E8C988; margin-bottom: .5rem;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, .5);
   }
-  .treasure__body { font-size: .9rem; line-height: 1.5; color: #5C4419; max-width: 42ch; }
+  .treasure__body { font-size: .9rem; line-height: 1.55; color: #D8CBA9; max-width: 42ch; }
+  .treasure__cta {
+    display: block; margin-top: .55rem; font-weight: 600; color: #F0D9A0;
+  }
   @media (max-width: 600px) {
     .treasure { grid-template-columns: 1fr; }
-    .treasure__art { padding-top: 1.1rem; }
+    .treasure__art { aspect-ratio: 687 / 480; }
+    .treasure__art::after { background: linear-gradient(0deg, rgba(10, 22, 32, .65), rgba(10, 22, 32, 0) 55%); }
     .treasure__text { padding-left: 1.15rem; }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .treasure__needle { animation: none; }
   }
 
   /* Gaps are labelled, never left blank. */
@@ -1156,6 +1164,7 @@
     <div class="col-agenda">
       <div class="head reveal">
         <h2 id="h-agenda">Agenda</h2>
+        <p class="head__note">Plans, not promises: timings may shift a little depending on weather, traffic, or the day itself.</p>
       </div>
       <div data-agenda></div>
     </div>
@@ -1209,7 +1218,6 @@
         <div class="fact"><dt>Check in</dt><dd class="mono">3:00 PM · Wed 12 Aug</dd></div>
         <div class="fact"><dt>Check out</dt><dd class="mono">10:30 AM · Fri 14 Aug</dd></div>
       </dl>
-      <p class="pack-foot">In an emergency, call an organiser below.</p>
 
       <div class="pending">
         <b>Rooming</b>
@@ -1398,7 +1406,8 @@ const ASSETS = {
   beachWide:      "./img/beach-wide.webp",
   meetingRoom:    "./img/meeting-room.webp",
   poolDeck:       "./img/pool-deck.webp",
-  roomInterior:   "./img/room-interior.webp"
+  roomInterior:   "./img/room-interior.webp",
+  lostTreasure:   "./img/lost-treasure.webp"
 };
 
 /* Day 3 is 14 Aug. The source agenda said "11-Jun (Friday)", which is a typo:
@@ -1634,25 +1643,17 @@ const CONTACTS = [
   function treasureCard() {
     return '<span class="treasure">' +
       '<span class="treasure__art">' +
-        '<svg class="treasure__map" viewBox="0 0 160 160" aria-hidden="true">' +
-          '<rect x="4" y="4" width="152" height="152" rx="10" fill="#F3E3B8" stroke="#8C5A1B" stroke-width="2" stroke-dasharray="6 4"/>' +
-          '<path d="M20,132 C52,102 38,62 82,52 C112,44 100,22 132,20" fill="none" stroke="#8C5A1B" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"/>' +
-          '<g transform="translate(132,20)">' +
-            '<line x1="-7" y1="-7" x2="7" y2="7" stroke="#B23A2E" stroke-width="3" stroke-linecap="round"/>' +
-            '<line x1="-7" y1="7" x2="7" y2="-7" stroke="#B23A2E" stroke-width="3" stroke-linecap="round"/>' +
-          "</g>" +
-          '<g transform="translate(38,118)">' +
-            '<circle r="19" fill="none" stroke="#8C5A1B" stroke-width="1.5"/>' +
-            '<g class="treasure__needle"><path d="M0,-14 L4,0 L0,14 L-4,0 Z" fill="#B23A2E"/></g>' +
-            '<circle r="2" fill="#4A3312"/>' +
-          "</g>" +
-        "</svg>" +
+        '<img class="treasure__poster" src="' + ASSETS.lostTreasure + '" ' +
+          'alt="Lost Treasure at Desaru: explorers racing along a stormy shoreline toward a shipwreck, gold spilling from an open chest" loading="lazy" width="687" height="1024">' +
       "</span>" +
       '<span class="treasure__text">' +
-        '<span class="treasure__kicker">Dinner theme</span>' +
+        '<span class="treasure__kicker">Dinner theme &middot; one night only</span>' +
         '<span class="treasure__title">Lost Treasure at Desaru</span>' +
-        '<span class="treasure__body">Fedora and compass optional, adventurous spirit is not. ' +
-          "One night only, full Indiana Jones under the stars, then it's back to beach-casual for the rest of the trip.</span>" +
+        '<span class="treasure__body">Old maps, older secrets. Somewhere along this coast, ' +
+          "a fortune has stayed buried since before anyone can remember, and tonight the story catches up with us. " +
+          "Storms roll in, shadows get long, and nobody quite trusts the crew standing next to them." +
+        "</span>" +
+        '<span class="treasure__cta">Come dressed as an explorer, a smuggler, or something the legend left behind.</span>' +
       "</span>" +
     "</span>";
   }
