@@ -85,11 +85,6 @@ Sand & Sandals Desaru, downloaded from the resort's own public site
 (sandandsandals.com) and re-hosted in `img/` as WebP, roughly 500 KB total.
 They are not hotlinked: the files live in this repository.
 
-Two more slots, `klccPhoto` and `desaruPhoto`, sit under the route map in
-Getting There and are currently empty (`ASSETS.klccPhoto = ""`). Add
-`img/klcc.webp` and `img/desaru.webp` and point those two keys at them to
-fill the strip in.
-
 **These are stand-ins for the committee's own event photography, not the final
 choice.** They show the real venue accurately, but nobody on the trip took
 them. Swap them for the committee's own photos of this event, or the resort's,

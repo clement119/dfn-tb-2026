@@ -489,33 +489,6 @@
   .route text { font-family: var(--mono); font-size: 13px; fill: var(--shell); letter-spacing: .04em; }
   .route .sub { fill: var(--ink-faint); font-size: 11px; }
 
-  .route-photos {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: clamp(.75rem, 2vw, 1.25rem);
-    list-style: none;
-    margin-top: 1.75rem;
-  }
-  .route-photos__item {
-    position: relative;
-    aspect-ratio: 4 / 3;
-    border-radius: var(--r-core);
-    overflow: hidden;
-    background: var(--shelf);
-  }
-  .route-photos__item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .route-photos__item::after {
-    content: "";
-    position: absolute; inset: 0;
-    background: linear-gradient(to top, rgba(13,34,48,.62), transparent 55%);
-    pointer-events: none;
-  }
-  .route-photos__cap {
-    position: absolute; left: .85rem; bottom: .65rem; z-index: 1;
-    font-family: var(--mono); font-size: .68rem;
-    text-transform: uppercase; letter-spacing: .12em;
-    color: var(--over-video);
-  }
-
   /* ---------- agenda ---------- */
   .day { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: clamp(1.5rem, 3vw, 3rem); }
   .day + .day { margin-top: clamp(3.5rem, 8vh, 6rem); }
@@ -556,7 +529,6 @@
   .slot__time-end { font-size: .72rem; font-weight: 400; color: var(--ink-faint); }
   .slot__body { display: grid; gap: .18rem; }
   .slot__event { color: var(--foam); font-weight: 500; }
-  .slot__pic { color: var(--ink-faint); font-size: .82rem; font-family: var(--mono); letter-spacing: .04em; }
   .slot__note { color: var(--ink-muted); font-size: .88rem; }
 
   /* The one themed moment on the page: the Lost Treasure dinner. Stormy
@@ -906,11 +878,9 @@
      ::before, not ::after: gallery items already use ::after for the
      caption scrim, and one element only gets one of each pseudo-element. */
   [data-debug] .stay__figure,
-  [data-debug] .gallery__item,
-  [data-debug] .route-photos__item { outline: 2px dashed var(--lowsun); outline-offset: -2px; }
+  [data-debug] .gallery__item { outline: 2px dashed var(--lowsun); outline-offset: -2px; }
   [data-debug] .stay__figure::before,
-  [data-debug] .gallery__item::before,
-  [data-debug] .route-photos__item::before {
+  [data-debug] .gallery__item::before {
     content: attr(data-asset-key);
     position: absolute; left: .5rem; top: .5rem; z-index: 2;
     background: var(--lowsun); color: var(--casuarina);
@@ -1162,17 +1132,6 @@
         <text x="212" y="330" text-anchor="end">DESARU</text>
         <text class="sub" x="212" y="347" text-anchor="end">SAND &amp; SANDALS</text>
       </svg>
-
-      <ul class="route-photos" data-route-photos>
-        <li class="route-photos__item" data-asset="klccPhoto" data-asset-key="klccPhoto"
-            data-asset-mode="prepend" data-asset-alt="Petronas Twin Towers lit up at night in Kuala Lumpur.">
-          <span class="route-photos__cap">KLCC</span>
-        </li>
-        <li class="route-photos__item" data-asset="desaruPhoto" data-asset-key="desaruPhoto"
-            data-asset-mode="prepend" data-asset-alt="A quiet stretch of white sand beach and turquoise water at Desaru.">
-          <span class="route-photos__cap">Desaru</span>
-        </li>
-      </ul>
     </div>
   </div>
 </section>
@@ -1433,12 +1392,7 @@ const ASSETS = {
   meetingRoom:    "./img/meeting-room.webp",
   poolDeck:       "./img/pool-deck.webp",
   roomInterior:   "./img/room-interior.webp",
-  lostTreasure:   "./img/lost-treasure.webp",
-  /* Not yet supplied: add img/klcc.webp and img/desaru.webp, then point
-     these two at them. Empty for now, so the Getting There strip just
-     shows its plain background tint until the photos land. */
-  klccPhoto:      "",
-  desaruPhoto:    ""
+  lostTreasure:   "./img/lost-treasure.webp"
 };
 
 /* Day 3 is 14 Aug. The source agenda said "11-Jun (Friday)", which is a typo:
@@ -1448,41 +1402,41 @@ const AGENDA = [
     day: "Day 1", date: "Wed 12 Aug", id: "d1",
     note: "Travel down, check in, and straight into the first session.",
     items: [
-      { time: "7:30 AM",  end: "8:00 AM",   event: "Arrival of participants at KLCC", pic: "Everyone" },
-      { time: "8:00 AM",  end: "12:30 PM",  event: "Travel to Desaru",                pic: "Everyone" },
-      { time: "12:30 PM", end: "2:00 PM",   event: "Lunch at Desaru",                 pic: "Everyone" },
+      { time: "7:30 AM",  end: "8:00 AM",   event: "Arrival of participants at KLCC" },
+      { time: "8:00 AM",  end: "12:30 PM",  event: "Travel to Desaru" },
+      { time: "12:30 PM", end: "2:00 PM",   event: "Lunch at Desaru" },
       { time: "2:00 PM",  end: "3:00 PM",   event: "Free time / buffer" },
-      { time: "3:00 PM",  end: "3:30 PM",   event: "Hotel check-in",                  pic: "Everyone" },
-      { time: "3:30 PM",  end: "6:30 PM",   event: "Team Building Slot 1 (TBD)",      pic: "Trainer" },
+      { time: "3:00 PM",  end: "3:30 PM",   event: "Hotel check-in" },
+      { time: "3:30 PM",  end: "6:30 PM",   event: "Team Building Slot 1 (TBD)" },
       { time: "6:30 PM",  end: "7:30 PM",   event: "Break / freshen up" },
-      { time: "7:30 PM",  end: "8:30 PM",   event: "Dinner",                          pic: "Hotel" },
-      { time: "8:30 PM",  end: "10:30 PM",  event: "Team Building Slot 2 (TBD)",      pic: "Trainer" }
+      { time: "7:30 PM",  end: "8:30 PM",   event: "Dinner" },
+      { time: "8:30 PM",  end: "10:30 PM",  event: "Team Building Slot 2 (TBD)" }
     ]
   },
   {
     day: "Day 2", date: "Thu 13 Aug", id: "d2",
     note: "The one full day at the resort, capped off with the night everyone's been waiting for.",
     items: [
-      { time: "7:30 AM",  end: "8:30 AM",   event: "Breakfast",                  pic: "Hotel" },
+      { time: "7:30 AM",  end: "8:30 AM",   event: "Breakfast" },
       { time: "8:30 AM",  end: "9:00 AM",   event: "Break / preparation" },
-      { time: "9:00 AM",  end: "12:30 PM",  event: "Team Building Slot 3 (TBD)", pic: "Trainer" },
-      { time: "12:30 PM", end: "2:30 PM",   event: "Lunch",                      pic: "Hotel" },
+      { time: "9:00 AM",  end: "12:30 PM",  event: "Team Building Slot 3 (TBD)" },
+      { time: "12:30 PM", end: "2:30 PM",   event: "Lunch" },
       { time: "2:30 PM",  end: "3:00 PM",   event: "Break / preparation" },
-      { time: "3:00 PM",  end: "6:00 PM",   event: "Team Building Slot 4 (TBD)", pic: "Trainer" },
+      { time: "3:00 PM",  end: "6:00 PM",   event: "Team Building Slot 4 (TBD)" },
       { time: "6:00 PM",  end: "7:30 PM",   event: "Break / freshen up" },
-      { time: "7:30 PM",  end: "10:30 PM",  event: "Themed dinner", pic: "Hotel & Trainer", theme: "treasure" }
+      { time: "7:30 PM",  end: "10:30 PM",  event: "Themed dinner", theme: "treasure" }
     ]
   },
   {
     day: "Day 3", date: "Fri 14 Aug", id: "d3", offsite: true,
     note: "One last workshop, a pitstop on the way, then back to KL.",
     items: [
-      { time: "8:00 AM",  end: "9:00 AM",   event: "Breakfast",                                pic: "Hotel" },
-      { time: "9:00 AM",  end: "10:30 AM",  event: "Systemic shift and upstream structure",     pic: "Trainer" },
-      { time: "10:30 AM", end: "11:00 AM",  event: "Photo session and hotel check-out",         pic: "Everyone" },
-      { time: "11:00 AM", end: "2:00 PM",   event: "Pitstop at JPO & lunch",                    pic: "Everyone", offsite: true },
-      { time: "2:00 PM",  end: "6:30 PM",   event: "Travel to Kuala Lumpur",                    pic: "Everyone", offsite: true },
-      { time: "7:00 PM",  event: "Arrival of participants at KLCC",                             pic: "Everyone" }
+      { time: "8:00 AM",  end: "9:00 AM",   event: "Breakfast" },
+      { time: "9:00 AM",  end: "10:30 AM",  event: "Systemic shift and upstream structure" },
+      { time: "10:30 AM", end: "11:00 AM",  event: "Photo session and hotel check-out" },
+      { time: "11:00 AM", end: "2:00 PM",   event: "Pitstop at JPO & lunch", offsite: true },
+      { time: "2:00 PM",  end: "6:30 PM",   event: "Travel to Kuala Lumpur", offsite: true },
+      { time: "7:00 PM",  event: "Arrival of participants at KLCC" }
     ]
   }
 ];
@@ -1671,7 +1625,7 @@ const CONTACTS = [
           'alt="Lost Treasure at Desaru: explorers racing along a stormy shoreline toward a shipwreck, gold spilling from an open chest" loading="lazy" width="687" height="1024">' +
       "</span>" +
       '<span class="treasure__text">' +
-        '<span class="treasure__kicker">Dinner theme &middot; one night only</span>' +
+        '<span class="treasure__kicker">Dinner theme</span>' +
         '<span class="treasure__title">Lost Treasure at Desaru</span>' +
         '<span class="treasure__body">Old maps, older secrets. Somewhere along this coast, ' +
           "a fortune has stayed buried since before anyone can remember, and tonight the story catches up with us. " +
@@ -1702,7 +1656,6 @@ const CONTACTS = [
                    '<span class="slot__event">' + esc(it.event) +
                      (it.confirm ? '<span class="chip">To confirm</span>' : "") +
                    "</span>" +
-                   (it.pic  ? '<span class="slot__pic">' + esc(it.pic) + "</span>" : "") +
                    (it.note ? '<span class="slot__note">' + esc(it.note) + "</span>" : "") +
                    (it.theme === "treasure" ? treasureCard() : "") +
                  "</span>" +
