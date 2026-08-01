@@ -349,23 +349,40 @@
   .themes svg { width: 1.1em; height: 1.1em; flex: none; color: var(--gold); }
 
   .hero__facts {
-    display: flex; flex-wrap: wrap;
-    align-items: baseline;
-    gap: .6rem 1.5rem;
+    display: flex; flex-wrap: wrap; align-items: center;
+    gap: 1rem 1.5rem;
+  }
+  .hero__meta {
+    color: var(--over-video);
+    font-size: clamp(.95rem, 2vw, 1.15rem);
+    letter-spacing: .08em;
+    font-weight: 500;
+  }
+  .hero__meta .sep { color: rgba(251, 250, 247, .45); margin: 0 .1em; }
+  @media (max-width: 560px) {
+    .hero__facts { display: grid; justify-items: start; gap: .75rem; }
+  }
+
+  /* A distinct little widget, not just more inline text: digits big
+     enough to actually read as a countdown at a glance. */
+  .hero__timer {
+    display: inline-flex; align-items: baseline; gap: .5rem;
+    padding: .55rem 1.1rem;
+    border: 1px solid rgba(216, 181, 106, .4);
+    border-radius: var(--r-pill);
+    background: rgba(13, 34, 48, .4);
+  }
+  .hero__timer-num {
+    font-size: clamp(1.4rem, 3.4vw, 1.9rem);
+    font-weight: 600;
+    color: var(--gold);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+  }
+  .hero__timer-unit {
+    font-size: .78rem; text-transform: uppercase; letter-spacing: .12em;
     color: var(--over-video-soft);
   }
-  .hero__facts .sep { color: rgba(251, 250, 247, .4); }
-  /* Below 560px the three facts stack. Wrapping them left the countdown
-     flush against the right edge with an orphaned separator. */
-  @media (max-width: 560px) {
-    .hero__facts { display: grid; justify-items: start; gap: .3rem; }
-    .hero__facts .sep { display: none; }
-  }
-  .hero__count {
-    display: inline-flex; align-items: baseline; gap: .45rem;
-    color: var(--gold);
-  }
-  .hero__count b { font-weight: 500; font-size: 1.05rem; }
 
   /* While the media layer is pinned behind it, Getting there floats as a
      paper panel over the moving water. In fallback mode this rule never
@@ -1046,12 +1063,11 @@
       <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><use href="#ic-connect"/></svg>Connect</li>
       <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><use href="#ic-celebrate"/></svg>Celebrate</li>
     </ul>
-    <div class="hero__facts mono">
-      <span>12-14 AUG 2026</span>
-      <span class="sep">/</span>
-      <span>SAND &amp; SANDALS DESARU</span>
-      <span class="sep">/</span>
-      <span class="hero__count" data-countdown><b>&nbsp;</b></span>
+    <div class="hero__facts">
+      <p class="hero__meta mono">12-14 AUG 2026 <span class="sep">/</span> SAND &amp; SANDALS DESARU</p>
+      <div class="hero__timer mono" data-countdown>
+        <span class="hero__timer-num">&nbsp;</span>
+      </div>
     </div>
   </div>
  </header>
@@ -1088,11 +1104,6 @@
         <span class="leg__time mono">8:00 AM</span>
         <span class="leg__what">Coach rolls out</span>
         <span class="leg__where">One coach for the whole crew, so don't miss it.</span>
-      </div>
-      <div class="leg">
-        <span class="leg__time mono">2:00 PM</span>
-        <span class="leg__what">Coach heads back to KL</span>
-        <span class="leg__where">Friday 14 August, back at KLCC around 7:00 PM.</span>
       </div>
 
       <div class="rules">
@@ -1317,7 +1328,6 @@
             <p class="block__name">Good to know</p>
             <ul class="quiet-list">
               <li>The committee photographs throughout, with a group photo at the end of each event.</li>
-              <li>What happens at Desaru stays at Desaru. Please keep event content within the team.</li>
               <li>Feel free to bring your own prayer mat and telekung.</li>
             </ul>
           </div>
@@ -1449,7 +1459,6 @@ const PACKING = [
   { cluster: "Wear",       id: "swim",        label: "Swimwear" },
   { cluster: "Wear",       id: "treasurefit", label: "Lost Treasure dinner costume" },
 
-  { cluster: "Bring",      id: "masks",       label: "3-ply face masks" },
   { cluster: "Bring",      id: "sanitiser",   label: "Hand sanitiser" },
   { cluster: "Bring",      id: "motionmeds",  label: "Car sickness medication" },
   { cluster: "Bring",      id: "meds",        label: "Any personal medication" },
@@ -1600,12 +1609,12 @@ const CONTACTS = [
 
     const tick = () => {
       const ms = start - Date.now();
-      if (ms <= 0) { el.innerHTML = "<b>Happening now</b>"; return; }
+      if (ms <= 0) { el.innerHTML = '<span class="hero__timer-num">Happening now</span>'; return; }
       const d = Math.floor(ms / 864e5);
       const h = Math.floor(ms / 36e5) % 24;
-      el.innerHTML = d > 0
-        ? "<b>" + d + "</b> day" + (d === 1 ? "" : "s") + " to go"
-        : "<b>" + h + "</b> hour" + (h === 1 ? "" : "s") + " to go";
+      const n = d > 0 ? d : h;
+      const unit = (d > 0 ? "day" : "hour") + (n === 1 ? "" : "s") + " to go";
+      el.innerHTML = '<span class="hero__timer-num">' + n + '</span><span class="hero__timer-unit">' + unit + "</span>";
     };
     tick();
     setInterval(tick, 60000);
