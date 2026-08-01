@@ -352,13 +352,15 @@
     display: flex; flex-wrap: wrap; align-items: center;
     gap: 1rem 1.5rem;
   }
-  .hero__meta {
+  .hero__meta { display: grid; gap: .45rem; }
+  .hero__meta-line {
+    display: flex; align-items: center; gap: .55rem;
     color: var(--over-video);
     font-size: clamp(.95rem, 2vw, 1.15rem);
     letter-spacing: .08em;
     font-weight: 500;
   }
-  .hero__meta .sep { color: rgba(251, 250, 247, .45); margin: 0 .1em; }
+  .hero__meta-line svg { width: 1.05em; height: 1.05em; flex: none; color: var(--gold); }
   @media (max-width: 560px) {
     .hero__facts { display: grid; justify-items: start; gap: .75rem; }
   }
@@ -1002,6 +1004,23 @@
   </defs>
 </svg>
 
+<!-- Hero meta icons: hand-built (not a library), stroke style to match the
+     jump-panel caret rather than the filled theme icons above. -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="ic-calendar" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="40" y="56" width="176" height="152" rx="16"/>
+      <line x1="40" y1="104" x2="216" y2="104"/>
+      <line x1="88" y1="32" x2="88" y2="72"/>
+      <line x1="168" y1="32" x2="168" y2="72"/>
+    </g>
+    <g id="ic-pin" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M128,224 C128,224 200,152 200,100 A72,72 0 1 0 56,100 C56,152 128,224 128,224 Z"/>
+      <circle cx="128" cy="100" r="28"/>
+    </g>
+  </defs>
+</svg>
+
 <!-- ============================================================ *
  * S0 · HERO + GETTING THERE, sharing the pinned timelapse
  * ============================================================ -->
@@ -1064,7 +1083,10 @@
       <li><svg viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><use href="#ic-celebrate"/></svg>Celebrate</li>
     </ul>
     <div class="hero__facts">
-      <p class="hero__meta mono">12-14 AUG 2026 <span class="sep">/</span> SAND &amp; SANDALS DESARU</p>
+      <div class="hero__meta">
+        <p class="hero__meta-line mono"><svg viewBox="0 0 256 256" aria-hidden="true"><use href="#ic-calendar"/></svg>12-14 AUG 2026</p>
+        <p class="hero__meta-line mono"><svg viewBox="0 0 256 256" aria-hidden="true"><use href="#ic-pin"/></svg>SAND &amp; SANDALS DESARU</p>
+      </div>
       <div class="hero__timer mono" data-countdown>
         <span class="hero__timer-num">&nbsp;</span>
       </div>
@@ -1442,7 +1464,7 @@ const AGENDA = [
     note: "One last workshop, a pitstop on the way, then back to KL.",
     items: [
       { time: "8:00 AM",  end: "9:00 AM",   event: "Breakfast" },
-      { time: "9:00 AM",  end: "10:30 AM",  event: "Systemic shift and upstream structure" },
+      { time: "9:00 AM",  end: "10:30 AM",  event: "Upstream Enhanced Operating Model" },
       { time: "10:30 AM", end: "11:00 AM",  event: "Photo session and hotel check-out" },
       { time: "11:00 AM", end: "2:00 PM",   event: "Pitstop at JPO & lunch", offsite: true },
       { time: "2:00 PM",  end: "6:30 PM",   event: "Travel to Kuala Lumpur", offsite: true },
