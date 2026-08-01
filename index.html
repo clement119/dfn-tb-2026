@@ -489,6 +489,33 @@
   .route text { font-family: var(--mono); font-size: 13px; fill: var(--shell); letter-spacing: .04em; }
   .route .sub { fill: var(--ink-faint); font-size: 11px; }
 
+  .route-photos {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: clamp(.75rem, 2vw, 1.25rem);
+    list-style: none;
+    margin-top: 1.75rem;
+  }
+  .route-photos__item {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    border-radius: var(--r-core);
+    overflow: hidden;
+    background: var(--shelf);
+  }
+  .route-photos__item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .route-photos__item::after {
+    content: "";
+    position: absolute; inset: 0;
+    background: linear-gradient(to top, rgba(13,34,48,.62), transparent 55%);
+    pointer-events: none;
+  }
+  .route-photos__cap {
+    position: absolute; left: .85rem; bottom: .65rem; z-index: 1;
+    font-family: var(--mono); font-size: .68rem;
+    text-transform: uppercase; letter-spacing: .12em;
+    color: var(--over-video);
+  }
+
   /* ---------- agenda ---------- */
   .day { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 9fr); gap: clamp(1.5rem, 3vw, 3rem); }
   .day + .day { margin-top: clamp(3.5rem, 8vh, 6rem); }
@@ -525,7 +552,8 @@
     padding-block: 1.05rem;
     align-items: baseline;
   }
-  .slot__time { color: var(--lowsun); text-align: right; white-space: nowrap; }
+  .slot__time { color: var(--lowsun); text-align: right; white-space: nowrap; display: grid; gap: .15rem; justify-items: end; }
+  .slot__time-end { font-size: .72rem; font-weight: 400; color: var(--ink-faint); }
   .slot__body { display: grid; gap: .18rem; }
   .slot__event { color: var(--foam); font-weight: 500; }
   .slot__pic { color: var(--ink-faint); font-size: .82rem; font-family: var(--mono); letter-spacing: .04em; }
@@ -570,8 +598,10 @@
   }
   @media (max-width: 600px) {
     .treasure { grid-template-columns: 1fr; }
-    .treasure__art { aspect-ratio: 687 / 480; }
-    .treasure__art::after { background: linear-gradient(0deg, rgba(10, 22, 32, .65), rgba(10, 22, 32, 0) 55%); }
+    /* Full poster height on mobile, not a cropped landscape strip, so the
+       "Lost Treasure at Desaru" lettering baked into the artwork stays legible. */
+    .treasure__art { aspect-ratio: 687 / 1024; }
+    .treasure__art::after { background: linear-gradient(0deg, rgba(10, 22, 32, .7), rgba(10, 22, 32, 0) 40%); }
     .treasure__text { padding-left: 1.15rem; }
   }
 
@@ -702,17 +732,6 @@
   .pending b { color: var(--shell); font-weight: 600; display: block; margin-bottom: .2rem; font-family: var(--display); }
 
   /* ---------- pack this ---------- */
-  .dress {
-    font-family: var(--display);
-    font-size: clamp(1.5rem, 4vw, 2.4rem);
-    line-height: 1.16; letter-spacing: -.02em;
-    font-variation-settings: "wdth" 90;
-    color: var(--foam);
-    max-width: 22ch;
-    margin-bottom: clamp(2rem, 5vh, 3.5rem);
-  }
-  .dress b { color: var(--lowsun); font-weight: 600; }
-
   .cluster + .cluster { margin-top: 2.25rem; }
   .cluster__name {
     font-family: var(--mono); font-size: .7rem;
@@ -887,9 +906,11 @@
      ::before, not ::after: gallery items already use ::after for the
      caption scrim, and one element only gets one of each pseudo-element. */
   [data-debug] .stay__figure,
-  [data-debug] .gallery__item { outline: 2px dashed var(--lowsun); outline-offset: -2px; }
+  [data-debug] .gallery__item,
+  [data-debug] .route-photos__item { outline: 2px dashed var(--lowsun); outline-offset: -2px; }
   [data-debug] .stay__figure::before,
-  [data-debug] .gallery__item::before {
+  [data-debug] .gallery__item::before,
+  [data-debug] .route-photos__item::before {
     content: attr(data-asset-key);
     position: absolute; left: .5rem; top: .5rem; z-index: 2;
     background: var(--lowsun); color: var(--casuarina);
@@ -1099,9 +1120,9 @@
         <span class="leg__where">One coach for the whole crew, so don't miss it.</span>
       </div>
       <div class="leg">
-        <span class="leg__time mono">3:00 PM</span>
-        <span class="leg__what">Return coach leaves Pengerang<span class="chip" data-chip-confirm>To confirm</span></span>
-        <span class="leg__where">Friday 14 August, back at KLCC around 8:00 PM.</span>
+        <span class="leg__time mono">2:00 PM</span>
+        <span class="leg__what">Coach heads back to KL</span>
+        <span class="leg__where">Friday 14 August, back at KLCC around 7:00 PM.</span>
       </div>
 
       <div class="rules">
@@ -1141,6 +1162,17 @@
         <text x="212" y="330" text-anchor="end">DESARU</text>
         <text class="sub" x="212" y="347" text-anchor="end">SAND &amp; SANDALS</text>
       </svg>
+
+      <ul class="route-photos" data-route-photos>
+        <li class="route-photos__item" data-asset="klccPhoto" data-asset-key="klccPhoto"
+            data-asset-mode="prepend" data-asset-alt="Petronas Twin Towers lit up at night in Kuala Lumpur.">
+          <span class="route-photos__cap">KLCC</span>
+        </li>
+        <li class="route-photos__item" data-asset="desaruPhoto" data-asset-key="desaruPhoto"
+            data-asset-mode="prepend" data-asset-alt="A quiet stretch of white sand beach and turquoise water at Desaru.">
+          <span class="route-photos__cap">Desaru</span>
+        </li>
+      </ul>
     </div>
   </div>
 </section>
@@ -1211,6 +1243,7 @@
     <div class="col-stay-b reveal reveal--right">
       <div class="head">
         <h2 id="h-stay">Venue</h2>
+        <p class="head__note">Home base for three days: sand, sea, and a proper bed to crash into each night.</p>
       </div>
       <dl class="facts">
         <div class="fact"><dt>Resort</dt><dd>Sand &amp; Sandals Desaru Beach Resort &amp; Spa</dd></div>
@@ -1265,9 +1298,8 @@
     <div class="col-pack reveal">
       <div class="head">
         <h2 id="h-pack" data-pack-head>Packing list</h2>
+        <p class="head__note">Everything you need, nothing you don't. Tick each one off as it goes in the bag.</p>
       </div>
-
-      <p class="dress"><b>Smart casual.</b> Comfortable shoes, there are games. Bring a jacket if you feel the cold.</p>
 
       <div class="shell">
         <div class="core">
@@ -1298,33 +1330,27 @@
   <div class="grid">
     <div class="col-safety">
       <div class="head reveal">
-        <h2 id="h-safety">HSE</h2>
+        <h2 id="h-safety">HSE Reminder</h2>
+        <p class="head__note">We're here to have fun, but safety is still the priority. A few reminders before we hit the sand.</p>
       </div>
 
       <div class="safety-grid">
         <div class="reveal">
           <p class="block__name">Before you come</p>
-          <p class="hardrule">Feeling feverish, coughing, or short of breath? Please rest up at home and sit this one out.</p>
-
-          <!-- TODO (B4, B5): Pengerang site-visit requirements and the Friday
-               prayer arrangement drop in here. It sits in the left column so it
-               fills the space under the hard rule instead of lengthening the
-               right one. Set PENGERANG.show to true in the data block once
-               these are confirmed; no layout change is needed. -->
-          <div class="block" data-pengerang hidden>
-            <p class="block__name">Pengerang site visit</p>
-            <ul class="quiet-list" data-pengerang-list></ul>
-          </div>
+          <p class="hardrule">Not a confident swimmer, or have a health condition we should know about? Tell your team lead before we go, so we can look out for you.</p>
         </div>
 
         <div class="reveal">
           <div class="block">
             <p class="block__name">While you are there</p>
             <ul class="quiet-list">
-              <li>A 3-ply face mask in common areas is a kind habit.</li>
               <li>Wash and sanitise your hands often.</li>
               <li>Cover your mouth when you cough or sneeze.</li>
               <li>Contactless greetings work great.</li>
+              <li>Swim between the flags and mind the current. If in doubt, sit that dip out.</li>
+              <li>Sun's strong out here: reapply sunscreen every couple of hours and keep the water topped up.</li>
+              <li>Thunder or lightning nearby? Head indoors with everyone else until it clears.</li>
+              <li>Spot a jellyfish or anything else in the water you don't recognise? Give it space and flag a lifeguard.</li>
             </ul>
           </div>
 
@@ -1365,7 +1391,7 @@
     <a href="#agenda"><span>Agenda</span></a>
     <a href="#the-stay"><span>Venue</span></a>
     <a href="#pack"><span>Packing list</span></a>
-    <a href="#safety"><span>HSE</span></a>
+    <a href="#safety"><span>HSE Reminder</span></a>
     <a href="#hero"><span>Back to the top</span></a>
   </div>
   <button class="jump__btn" data-jump-btn aria-expanded="false" aria-controls="jump-panel">
@@ -1407,7 +1433,12 @@ const ASSETS = {
   meetingRoom:    "./img/meeting-room.webp",
   poolDeck:       "./img/pool-deck.webp",
   roomInterior:   "./img/room-interior.webp",
-  lostTreasure:   "./img/lost-treasure.webp"
+  lostTreasure:   "./img/lost-treasure.webp",
+  /* Not yet supplied: add img/klcc.webp and img/desaru.webp, then point
+     these two at them. Empty for now, so the Getting There strip just
+     shows its plain background tint until the photos land. */
+  klccPhoto:      "",
+  desaruPhoto:    ""
 };
 
 /* Day 3 is 14 Aug. The source agenda said "11-Jun (Friday)", which is a typo:
@@ -1417,40 +1448,41 @@ const AGENDA = [
     day: "Day 1", date: "Wed 12 Aug", id: "d1",
     note: "Travel down, check in, and straight into the first session.",
     items: [
-      { time: "7:30 AM",  event: "Meet at KLCC Twin Towers",         pic: "Everyone" },
-      { time: "8:00 AM",  event: "Coach rolls out for Desaru",       pic: "Everyone" },
-      { time: "12:30 PM", event: "Lunch",                            pic: "Everyone" },
-      { gap: "In transit" },
-      { time: "3:00 PM",  event: "Hotel check-in",                   pic: "Everyone" },
-      { time: "3:30 PM",  event: "Desired Behaviours workshop",      pic: "Everyone & Trainer" },
-      { time: "4:30 PM",  event: "Team Building Slot 1",             pic: "Trainer" },
-      { time: "7:30 PM",  event: "Dinner",                           pic: "Hotel" },
-      { time: "8:30 PM",  event: "Team Building Slot 2",             pic: "Trainer" },
-      { time: "9:00 PM",  event: "KPI and S&I Check-In",             pic: "KPI Focal" }
+      { time: "7:30 AM",  end: "8:00 AM",   event: "Arrival of participants at KLCC", pic: "Everyone" },
+      { time: "8:00 AM",  end: "12:30 PM",  event: "Travel to Desaru",                pic: "Everyone" },
+      { time: "12:30 PM", end: "2:00 PM",   event: "Lunch at Desaru",                 pic: "Everyone" },
+      { time: "2:00 PM",  end: "3:00 PM",   event: "Free time / buffer" },
+      { time: "3:00 PM",  end: "3:30 PM",   event: "Hotel check-in",                  pic: "Everyone" },
+      { time: "3:30 PM",  end: "6:30 PM",   event: "Team Building Slot 1 (TBD)",      pic: "Trainer" },
+      { time: "6:30 PM",  end: "7:30 PM",   event: "Break / freshen up" },
+      { time: "7:30 PM",  end: "8:30 PM",   event: "Dinner",                          pic: "Hotel" },
+      { time: "8:30 PM",  end: "10:30 PM",  event: "Team Building Slot 2 (TBD)",      pic: "Trainer" }
     ]
   },
   {
     day: "Day 2", date: "Thu 13 Aug", id: "d2",
-    note: "The one full day at the resort, ending with the BBQ.",
+    note: "The one full day at the resort, capped off with the night everyone's been waiting for.",
     items: [
-      { time: "7:30 AM",  event: "Breakfast",              pic: "Hotel" },
-      { time: "9:00 AM",  event: "Team Building Slot 3",   pic: "Trainer" },
-      { time: "12:30 PM", event: "Lunch",                  pic: "Hotel" },
-      { gap: "Free time" },
-      { time: "3:00 PM",  event: "Team Building Slot 4",   pic: "Trainer" },
-      { time: "7:30 PM",  event: "BBQ dinner",  pic: "Hotel & Trainer", theme: "treasure" }
+      { time: "7:30 AM",  end: "8:30 AM",   event: "Breakfast",                  pic: "Hotel" },
+      { time: "8:30 AM",  end: "9:00 AM",   event: "Break / preparation" },
+      { time: "9:00 AM",  end: "12:30 PM",  event: "Team Building Slot 3 (TBD)", pic: "Trainer" },
+      { time: "12:30 PM", end: "2:30 PM",   event: "Lunch",                      pic: "Hotel" },
+      { time: "2:30 PM",  end: "3:00 PM",   event: "Break / preparation" },
+      { time: "3:00 PM",  end: "6:00 PM",   event: "Team Building Slot 4 (TBD)", pic: "Trainer" },
+      { time: "6:00 PM",  end: "7:30 PM",   event: "Break / freshen up" },
+      { time: "7:30 PM",  end: "10:30 PM",  event: "Themed dinner", pic: "Hotel & Trainer", theme: "treasure" }
     ]
   },
   {
     day: "Day 3", date: "Fri 14 Aug", id: "d3", offsite: true,
-    note: "The day the group leaves the beach for a live industrial site.",
+    note: "One last workshop, a pitstop on the way, then back to KL.",
     items: [
-      { time: "7:00 AM",  event: "Breakfast",                              pic: "Hotel" },
-      { time: "8:30 AM",  event: "Photo session and prepare for checkout", pic: "Everyone" },
-      { time: "10:30 AM", event: "Hotel check-out",                        pic: "Everyone" },
-      { time: "11:00 AM", event: "Pengerang site visit",                   pic: "Everyone", offsite: true, note: "Site details and the Friday prayer arrangement will be confirmed.", confirm: true },
-      { time: "3:00 PM",  event: "Depart for KL",                          pic: "Everyone", offsite: true, confirm: true },
-      { time: "8:00 PM",  event: "Arrive KLCC Twin Towers",                pic: "Everyone" }
+      { time: "8:00 AM",  end: "9:00 AM",   event: "Breakfast",                                pic: "Hotel" },
+      { time: "9:00 AM",  end: "10:30 AM",  event: "Systemic shift and upstream structure",     pic: "Trainer" },
+      { time: "10:30 AM", end: "11:00 AM",  event: "Photo session and hotel check-out",         pic: "Everyone" },
+      { time: "11:00 AM", end: "2:00 PM",   event: "Pitstop at JPO & lunch",                    pic: "Everyone", offsite: true },
+      { time: "2:00 PM",  end: "6:30 PM",   event: "Travel to Kuala Lumpur",                    pic: "Everyone", offsite: true },
+      { time: "7:00 PM",  event: "Arrival of participants at KLCC",                             pic: "Everyone" }
     ]
   }
 ];
@@ -1458,6 +1490,7 @@ const AGENDA = [
 const PACKING = [
   { cluster: "Wear",       id: "smartcasual", label: "Smart casual outfits" },
   { cluster: "Wear",       id: "shoes",       label: "Comfortable shoes" },
+  { cluster: "Wear",       id: "sandals",     label: "Flip-flops or sandals" },
   { cluster: "Wear",       id: "jacket",      label: "A jacket" },
   { cluster: "Wear",       id: "swim",        label: "Swimwear" },
   { cluster: "Wear",       id: "treasurefit", label: "Lost Treasure dinner costume" },
@@ -1468,25 +1501,17 @@ const PACKING = [
   { cluster: "Bring",      id: "meds",        label: "Any personal medication" },
   { cluster: "Bring",      id: "prayer",      label: "Prayer mat and telekung" },
   { cluster: "Bring",      id: "sunscreen",   label: "Sunscreen and a cap" },
+  { cluster: "Bring",      id: "repellent",   label: "Insect repellent" },
+  { cluster: "Bring",      id: "phonepouch",  label: "Waterproof phone pouch" },
   { cluster: "Bring",      id: "bottle",      label: "Reusable water bottle" },
   { cluster: "Bring",      id: "charger",     label: "Charger and power bank" }
 ];
-
-/* Pengerang block in the safety section. Flip `show` to true once the
-   site requirements and the Friday prayer arrangement are confirmed. */
-const PENGERANG = {
-  show: false,
-  lines: [
-    "PPE comes into play on site. Details to follow.",
-    "Friday prayer arrangement to be confirmed."
-  ]
-};
 
 const CONTACTS = [
   { role: "Programme lead",                        name: "Faris",             phone: "" },
   { role: "Communication",                         name: "Idzuan",            phone: "" },
   { role: "Accommodation, transport and logistics", name: "Theva, Ili, Akeef", phone: "" },
-  { role: "HSE",                                   name: "Clement",           phone: "" }
+  { role: "HSE focal",                             name: "Clement, Wardah",   phone: "" }
 ];
 
 /* ============ EDIT EVERYTHING ABOVE ============ */
@@ -1578,7 +1603,6 @@ const CONTACTS = [
     const notes = [];
     if (missingAssets.length) notes.push("Photos not yet supplied: " + missingAssets.join(", "));
     if (missingPhones.length) notes.push("Phone numbers not yet supplied: " + missingPhones.join(", "));
-    if (!PENGERANG.show)      notes.push("Pengerang site requirements and the Friday prayer answer are still unconfirmed.");
     if (notes.length) {
       console.warn("[joining-instructions] Not ready to distribute:\n  - " + notes.join("\n  - ") +
         "\nLoad with ?assets=debug to label every image slot.");
@@ -1671,7 +1695,9 @@ const CONTACTS = [
                  "</li>";
         }
         return '<li class="slot' + (it.offsite ? " slot--offsite" : "") + '">' +
-                 '<span class="slot__time mono">' + esc(it.time) + "</span>" +
+                 '<span class="slot__time mono">' + esc(it.time) +
+                   (it.end ? '<span class="slot__time-end">' + esc(it.end) + "</span>" : "") +
+                 "</span>" +
                  '<span class="slot__body">' +
                    '<span class="slot__event">' + esc(it.event) +
                      (it.confirm ? '<span class="chip">To confirm</span>' : "") +
@@ -1709,16 +1735,6 @@ const CONTACTS = [
                '<p class="contact__name">' + esc(c.name) + "</p>" + tel +
              "</div></div>";
     }).join("");
-  })();
-
-  /* ---------------------------------------------------------- *
-   * Pengerang block (B4 / B5)
-   * ---------------------------------------------------------- */
-  (function pengerang() {
-    const block = $("[data-pengerang]");
-    if (!block || !PENGERANG.show) return;
-    $("[data-pengerang-list]").innerHTML = PENGERANG.lines.map((l) => "<li>" + esc(l) + "</li>").join("");
-    block.hidden = false;
   })();
 
   /* ---------------------------------------------------------- *
