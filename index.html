@@ -473,9 +473,13 @@
      body copy beside them instead of scaling up with the column. */
   .route { width: 100%; max-width: 360px; height: auto; margin-inline: auto; }
   .route .path {
-    fill: none; stroke: var(--lowsun); stroke-width: 2;
+    /* Deliberately always fully drawn, not hidden behind a scroll-triggered
+       reveal: this is wayfinding information, and a draw-in animation that
+       fails to fire for any reason leaves it invisible. The parent column
+       already carries its own fade-in via .reveal. Foam, not the softer
+       teal, so the line reads as a firm line rather than a faint wash. */
+    fill: none; stroke: var(--foam); stroke-width: 2.5;
     stroke-linecap: round;
-    stroke-dasharray: var(--len, 900); stroke-dashoffset: var(--len, 900);
   }
   .route .stop { fill: var(--foam); }
   .route .ring { fill: none; stroke: var(--foam); stroke-width: 1.5; opacity: .35; }
@@ -524,6 +528,44 @@
   .slot__event { color: var(--foam); font-weight: 500; }
   .slot__pic { color: var(--ink-faint); font-size: .82rem; font-family: var(--mono); letter-spacing: .04em; }
   .slot__note { color: var(--ink-muted); font-size: .88rem; }
+
+  /* The one themed moment on the page: the Lost Treasure dinner. Warm
+     parchment, deliberately not the site's teal/paper palette, so it reads
+     as a one-off occasion rather than a new section style. Nothing else on
+     the page uses this treatment. */
+  .treasure {
+    margin-top: .85rem;
+    display: grid; grid-template-columns: 128px 1fr;
+    border-radius: var(--r-core);
+    overflow: hidden;
+    background: linear-gradient(135deg, #F4E7C8, #E7CE99);
+    border: 1px solid rgba(94, 66, 25, .3);
+  }
+  .treasure__art { display: flex; align-items: center; justify-content: center; padding: .7rem; }
+  .treasure__map { width: 100%; max-width: 112px; height: auto; }
+  .treasure__needle {
+    transform-box: fill-box; transform-origin: center;
+    animation: treasure-spin 22s linear infinite;
+  }
+  @keyframes treasure-spin { to { transform: rotate(360deg); } }
+  .treasure__text { display: flex; flex-direction: column; justify-content: center; padding: 1rem 1.15rem 1.1rem .3rem; }
+  .treasure__kicker {
+    font-family: var(--mono); font-size: .68rem; text-transform: uppercase;
+    letter-spacing: .14em; color: #77480E; margin-bottom: .3rem;
+  }
+  .treasure__title {
+    font-family: var(--display); font-size: 1.15rem; font-weight: 600;
+    font-variation-settings: "wdth" 90; color: #3A2609; margin-bottom: .35rem;
+  }
+  .treasure__body { font-size: .9rem; line-height: 1.5; color: #5C4419; max-width: 42ch; }
+  @media (max-width: 600px) {
+    .treasure { grid-template-columns: 1fr; }
+    .treasure__art { padding-top: 1.1rem; }
+    .treasure__text { padding-left: 1.15rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .treasure__needle { animation: none; }
+  }
 
   /* Gaps are labelled, never left blank. */
   .slot--gap { opacity: .62; }
@@ -1166,12 +1208,8 @@
         <div class="fact"><dt>Address</dt><dd>Bandar Penawar, 81930 Kota Tinggi, Johor</dd></div>
         <div class="fact"><dt>Check in</dt><dd class="mono">3:00 PM · Wed 12 Aug</dd></div>
         <div class="fact"><dt>Check out</dt><dd class="mono">10:30 AM · Fri 14 Aug</dd></div>
-        <div class="fact">
-          <dt>Resort enquiries</dt>
-          <dd><a href="mailto:enquiry@sandandsandals.com">enquiry@sandandsandals.com</a></dd>
-        </div>
       </dl>
-      <p class="pack-foot">The resort has posted that its phone line is down and asks for email contact. In an emergency, call an organiser below rather than the resort.</p>
+      <p class="pack-foot">In an emergency, call an organiser below.</p>
 
       <div class="pending">
         <b>Rooming</b>
@@ -1391,7 +1429,7 @@ const AGENDA = [
       { time: "12:30 PM", event: "Lunch",                  pic: "Hotel" },
       { gap: "Free time" },
       { time: "3:00 PM",  event: "Team Building Slot 4",   pic: "Trainer" },
-      { time: "7:30 PM",  event: "BBQ and themed dinner",  pic: "Hotel & Trainer" }
+      { time: "7:30 PM",  event: "BBQ dinner",  pic: "Hotel & Trainer", theme: "treasure" }
     ]
   },
   {
@@ -1413,6 +1451,7 @@ const PACKING = [
   { cluster: "Wear",       id: "shoes",       label: "Comfortable shoes" },
   { cluster: "Wear",       id: "jacket",      label: "A jacket" },
   { cluster: "Wear",       id: "swim",        label: "Swimwear" },
+  { cluster: "Wear",       id: "treasurefit", label: "Lost Treasure dinner costume" },
 
   { cluster: "Bring",      id: "masks",       label: "3-ply face masks" },
   { cluster: "Bring",      id: "sanitiser",   label: "Hand sanitiser" },
@@ -1421,13 +1460,7 @@ const PACKING = [
   { cluster: "Bring",      id: "prayer",      label: "Prayer mat and telekung" },
   { cluster: "Bring",      id: "sunscreen",   label: "Sunscreen and a cap" },
   { cluster: "Bring",      id: "bottle",      label: "Reusable water bottle" },
-  { cluster: "Bring",      id: "charger",     label: "Charger and power bank" },
-
-  /* Pending confirmation of the Pengerang site details (B5).
-     Set PENGERANG.show to false to hide this cluster entirely. */
-  { cluster: "Site visit", id: "closedtoe",   label: "Closed-toe shoes" },
-  { cluster: "Site visit", id: "trousers",    label: "Long trousers" },
-  { cluster: "Site visit", id: "id",          label: "Photo ID or staff pass" }
+  { cluster: "Bring",      id: "charger",     label: "Charger and power bank" }
 ];
 
 /* Pengerang block in the safety section. Flip `show` to true once the
@@ -1594,6 +1627,36 @@ const CONTACTS = [
   /* ---------------------------------------------------------- *
    * Agenda
    * ---------------------------------------------------------- */
+  // The only agenda item that carries a theme card: Day 2's dinner.
+  // Deliberately a plain function, not markup baked into AGENDA, so the
+  // themed card stays a one-line opt-in (`theme: "treasure"`) on whichever
+  // item needs it rather than a special case threaded through the renderer.
+  function treasureCard() {
+    return '<span class="treasure">' +
+      '<span class="treasure__art">' +
+        '<svg class="treasure__map" viewBox="0 0 160 160" aria-hidden="true">' +
+          '<rect x="4" y="4" width="152" height="152" rx="10" fill="#F3E3B8" stroke="#8C5A1B" stroke-width="2" stroke-dasharray="6 4"/>' +
+          '<path d="M20,132 C52,102 38,62 82,52 C112,44 100,22 132,20" fill="none" stroke="#8C5A1B" stroke-width="2" stroke-dasharray="4 5" stroke-linecap="round"/>' +
+          '<g transform="translate(132,20)">' +
+            '<line x1="-7" y1="-7" x2="7" y2="7" stroke="#B23A2E" stroke-width="3" stroke-linecap="round"/>' +
+            '<line x1="-7" y1="7" x2="7" y2="-7" stroke="#B23A2E" stroke-width="3" stroke-linecap="round"/>' +
+          "</g>" +
+          '<g transform="translate(38,118)">' +
+            '<circle r="19" fill="none" stroke="#8C5A1B" stroke-width="1.5"/>' +
+            '<g class="treasure__needle"><path d="M0,-14 L4,0 L0,14 L-4,0 Z" fill="#B23A2E"/></g>' +
+            '<circle r="2" fill="#4A3312"/>' +
+          "</g>" +
+        "</svg>" +
+      "</span>" +
+      '<span class="treasure__text">' +
+        '<span class="treasure__kicker">Dinner theme</span>' +
+        '<span class="treasure__title">Lost Treasure at Desaru</span>' +
+        '<span class="treasure__body">Fedora and compass optional, adventurous spirit is not. ' +
+          "One night only, full Indiana Jones under the stars, then it's back to beach-casual for the rest of the trip.</span>" +
+      "</span>" +
+    "</span>";
+  }
+
   (function agenda() {
     const host = $("[data-agenda]");
     if (!host) return;
@@ -1614,6 +1677,7 @@ const CONTACTS = [
                    "</span>" +
                    (it.pic  ? '<span class="slot__pic">' + esc(it.pic) + "</span>" : "") +
                    (it.note ? '<span class="slot__note">' + esc(it.note) + "</span>" : "") +
+                   (it.theme === "treasure" ? treasureCard() : "") +
                  "</span>" +
                "</li>";
       }).join("");
@@ -1823,24 +1887,6 @@ const CONTACTS = [
       $$(".reveal").forEach((el) => io.observe(el));
     }
 
-    // Route line draws itself when the travel section arrives.
-    const route = $("[data-route]");
-    if (route) {
-      const len = Math.ceil(route.getTotalLength());
-      route.style.setProperty("--len", len);
-      if (reduced.matches) {
-        route.style.strokeDashoffset = "0";
-      } else {
-        new IntersectionObserver((es, obs) => {
-          es.forEach((e) => {
-            if (!e.isIntersecting) return;
-            route.style.transition = "stroke-dashoffset 1.9s cubic-bezier(.32,.72,0,1)";
-            route.style.strokeDashoffset = "0";
-            obs.disconnect();
-          });
-        }, { threshold: 0.35 }).observe(route);
-      }
-    }
   })();
 
   /* ---------------------------------------------------------- *

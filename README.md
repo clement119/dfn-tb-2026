@@ -33,7 +33,7 @@ You should not need to touch the HTML or the CSS.
 | `EVENT` | Title, venue, address, and the start date the countdown counts to. `tagline` is left empty on purpose (see "The hero" below) |
 | `ASSETS` | The photographs (see below) |
 | `AGENDA` | The three days. Each entry is `{ time, event, pic }`, plus optional `note` and `confirm` |
-| `PACKING` | The checklist. `cluster` groups items under "Wear", "Bring" and "Site visit" |
+| `PACKING` | The checklist. `cluster` groups items, currently "Wear" and "Bring" |
 | `PENGERANG` | The Pengerang site-visit block in the safety section (see "Open items") |
 | `CONTACTS` | The organiser cards at the bottom |
 
@@ -131,7 +131,7 @@ The page is built so that resolving them is a one-line edit.
 | B2 | Agenda said depart 8:30 AM, the transport booking said 8:00 AM | The page shows **one** call time: report 7:30 AM, coach departs 8:00 AM |
 | B3 | Agenda implies the return coach leaves Pengerang at 3:00 PM, the booking says 6:00 PM from the resort | Shows **3:00 PM from Pengerang** with a "To confirm" chip. Confirm with Theva, Ili and Akeef |
 | B4 | The Pengerang visit spans Friday prayers | Not yet answered on the page. See `PENGERANG` below |
-| B5 | Pengerang is a live industrial site, so PPE and site rules apply | Closed-toe shoes, long trousers and photo ID are in the checklist under "Site visit". The safety block is written but hidden |
+| B5 | Pengerang is a live industrial site, so PPE and site rules apply | The safety block for it is written in the HSE section but hidden until confirmed |
 | B6 | Unexplained gaps in Days 1 and 2 | Labelled "In transit" and "Free time" rather than left blank |
 | B7 | Day 1 lunch location | Shown simply as "Lunch"; add it back to the `AGENDA` entry once it's settled |
 
