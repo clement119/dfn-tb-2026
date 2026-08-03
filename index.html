@@ -311,14 +311,26 @@
     margin-inline: auto;
     width: 100%;
   }
-  .hero h1 { color: var(--over-video); margin-bottom: .5rem; }
+  .hero h1 { color: var(--over-video); }
 
+  /* Logo sits in a row with the title, sized off the same clamp() as the
+     headline font so it scales as one lockup rather than a small icon
+     dwarfed by giant type. */
+  .hero__title {
+    display: flex; align-items: flex-start;
+    gap: clamp(1rem, 3vw, 2rem);
+    margin-bottom: .5rem;
+  }
   .hero__badge {
-    width: clamp(56px, 7vw, 76px); height: auto;
+    width: var(--t-hero); height: var(--t-hero);
+    flex: none;
     display: block;
-    margin-bottom: 1.1rem;
     border-radius: 50%;
-    box-shadow: 0 10px 30px -12px rgba(0, 0, 0, .6);
+    box-shadow: 0 14px 38px -14px rgba(0, 0, 0, .65);
+  }
+  @media (max-width: 640px) {
+    .hero__title { gap: 1rem; }
+    .hero__badge { width: clamp(52px, 16vw, 84px); height: clamp(52px, 16vw, 84px); }
   }
 
   .hero__motto {
@@ -1072,8 +1084,10 @@
 
  <header class="hero" id="hero">
   <div class="hero__inner">
-    <img class="hero__badge" src="./img/dfn-badge.webp" alt="DFN'26 club crest" width="76" height="76">
-    <h1>Development Finance Teambuilding 2026</h1>
+    <div class="hero__title">
+      <img class="hero__badge" src="./img/dfn-badge.webp" alt="DFN'26 club crest">
+      <h1>Development Finance Teambuilding 2026</h1>
+    </div>
     <p class="hero__motto mono">ONE TEAM. ONE GOAL. ONE DFN.</p>
     <!-- The four themes, straight off the event banner. Phosphor icons (MIT). -->
     <ul class="themes">
