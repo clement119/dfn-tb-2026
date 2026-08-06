@@ -562,10 +562,10 @@
   .slot__event { color: var(--foam); font-weight: 500; }
   .slot__note { color: var(--ink-muted); font-size: .88rem; }
 
-  /* The one themed moment on the page: the Lost Treasure dinner. Stormy
-     navy and old gold, deliberately not the site's paper/teal palette, so
-     it reads as a one-off occasion rather than a new section style.
-     Nothing else on the page uses this treatment. */
+  /* The bigger of the two themed dinner moments: the Lost Treasure BBQ.
+     Stormy navy and old gold, deliberately not the site's paper/teal
+     palette, so it reads as a one-off occasion rather than a new section
+     style. */
   .treasure {
     margin-top: .85rem;
     display: grid; grid-template-columns: 132px 1fr;
@@ -608,6 +608,29 @@
     .treasure__text { padding-left: 1.15rem; }
   }
 
+  /* The smaller, quieter dinner theme: Day 1's pyjama party. Stays in the
+     site's own paper/teal palette (unlike .treasure) since it's a light
+     dress-code note, not a whole separate occasion. */
+  .pyjama {
+    margin-top: .85rem;
+    display: flex; align-items: center; gap: 1rem;
+    border-radius: var(--r-core);
+    padding: 1rem 1.15rem;
+    background: color-mix(in srgb, var(--seagrass) 22%, var(--casuarina));
+    border: 1px solid color-mix(in srgb, var(--lowsun) 30%, transparent);
+  }
+  .pyjama__icon { flex: none; width: 2.4rem; height: 2.4rem; color: var(--lowsun); }
+  .pyjama__text { display: flex; flex-direction: column; gap: .3rem; }
+  .pyjama__kicker {
+    font-family: var(--mono); font-size: .68rem; text-transform: uppercase;
+    letter-spacing: .14em; color: var(--lowsun);
+  }
+  .pyjama__title { font-family: var(--display); font-size: 1.05rem; font-weight: 600; color: var(--foam); }
+  .pyjama__body { font-size: .88rem; line-height: 1.4; color: var(--ink-muted); max-width: 46ch; }
+  @media (max-width: 480px) {
+    .pyjama { align-items: flex-start; }
+  }
+
   /* Gaps are labelled, never left blank. */
   .slot--gap { opacity: .62; }
   .slot--gap .slot__time { color: var(--ink-faint); }
@@ -637,6 +660,7 @@
     vertical-align: 2px;
     white-space: nowrap;
   }
+  .chip--required { background: var(--lowsun); color: var(--casuarina); border-color: var(--lowsun); }
 
   @media (max-width: 768px) {
     .day { grid-template-columns: 1fr; }
@@ -792,6 +816,12 @@
   .check__note { color: var(--ink-faint); font-size: .85rem; }
   .check[aria-pressed="true"] .check__label { text-decoration: line-through; text-decoration-thickness: 1px; color: var(--shell); opacity: .45; }
   .check[aria-pressed="true"] .check__note { opacity: .4; }
+
+  /* One item flagged compulsory (the DFC 2026 t-shirt): bolder label,
+     teal box outline, plus the solid chip, so it reads as unmissable
+     without a whole extra visual language. */
+  .check--required .check__label { font-weight: 700; }
+  .check--required .check__box { border-color: var(--lowsun); }
 
   .progress {
     display: flex; align-items: center; gap: .9rem;
@@ -1534,9 +1564,9 @@ const AGENDA = [
       { time: "8:30 AM",  end: "12:30 PM",  event: "Travelling to Desaru" },
       { time: "12:30 PM", end: "2:00 PM",   event: "Lunch at Kulai" },
       { time: "3:00 PM",  end: "3:30 PM",   event: "Hotel check-in" },
-      { time: "3:30 PM",  end: "6:30 PM",   event: "Teambuilding Slot 1 (TBD)" },
-      { time: "7:30 PM",  end: "8:30 PM",   event: "Dinner" },
-      { time: "8:30 PM",  end: "10:30 PM",  event: "Teambuilding Slot 2 (TBD)" }
+      { time: "3:30 PM",  end: "6:30 PM",   event: "Teambuilding Slot 1" },
+      { time: "7:30 PM",  end: "8:30 PM",   event: "Dinner", theme: "pyjama" },
+      { time: "8:30 PM",  end: "10:30 PM",  event: "Teambuilding Slot 2" }
     ]
   },
   {
@@ -1544,9 +1574,9 @@ const AGENDA = [
     note: "The one full day at the resort, capped off with the night everyone's been waiting for.",
     items: [
       { time: "7:30 AM",  end: "8:30 AM",   event: "Breakfast" },
-      { time: "9:00 AM",  end: "12:30 PM",  event: "Teambuilding Slot 3 (TBD)" },
+      { time: "9:00 AM",  end: "12:30 PM",  event: "Teambuilding Slot 3" },
       { time: "12:30 PM", end: "2:30 PM",   event: "Lunch" },
-      { time: "3:00 PM",  end: "6:00 PM",   event: "Teambuilding Slot 4 (TBD)" },
+      { time: "3:00 PM",  end: "6:00 PM",   event: "Teambuilding Slot 4" },
       { time: "7:30 PM",  end: "10:30 PM",  event: "BBQ & Themed Dinner", theme: "treasure" }
     ]
   },
@@ -1565,18 +1595,22 @@ const AGENDA = [
 ];
 
 const PACKING = [
+  { cluster: "Wear",       id: "tshirt",      label: "DFC 2026 t-shirt", required: true },
   { cluster: "Wear",       id: "smartcasual", label: "Smart casual outfits" },
   { cluster: "Wear",       id: "shoes",       label: "Comfortable shoes" },
   { cluster: "Wear",       id: "sandals",     label: "Flip-flops or sandals" },
   { cluster: "Wear",       id: "jacket",      label: "A jacket" },
   { cluster: "Wear",       id: "swim",        label: "Swimwear" },
+  { cluster: "Wear",       id: "pyjamas",     label: "Pyjamas (for Day 1 dinner)" },
   { cluster: "Wear",       id: "treasurefit", label: "Lost Treasure dinner costume" },
 
+  { cluster: "Bring",      id: "toiletries",  label: "Toiletries" },
   { cluster: "Bring",      id: "sanitiser",   label: "Hand sanitiser" },
   { cluster: "Bring",      id: "motionmeds",  label: "Car sickness medication" },
   { cluster: "Bring",      id: "meds",        label: "Any personal medication" },
   { cluster: "Bring",      id: "prayer",      label: "Prayer mat and telekung" },
   { cluster: "Bring",      id: "sunscreen",   label: "Sunscreen and a cap" },
+  { cluster: "Bring",      id: "sunglasses",  label: "Sunglasses" },
   { cluster: "Bring",      id: "repellent",   label: "Insect repellent" },
   { cluster: "Bring",      id: "phonepouch",  label: "Waterproof phone pouch" },
   { cluster: "Bring",      id: "bottle",      label: "Reusable water bottle" },
@@ -1603,7 +1637,7 @@ const ROOMS = [
   { room: "Room 8",       a: "Akeef Airyll Nazral Safril",    b: "Clement Tew Shu Huan" },
   { room: "Room 9",       a: "Ahmad Idzuan M Rosli",          b: "M Faris Zulkifle" },
   { room: "Room 10",      a: "Ahmad Rosmin Abd Halit",        b: "See Zhi Kai" },
-  { room: "Room 11",      a: "Nur Syafawati Shafiin",         b: "" },
+  { room: "Room 11",      a: "Nur Syafawati Shafiin",         b: "Syazwina Fatini Safari" },
   { room: "Room 12 (SM)", a: "Roziya Ali",                    b: "" },
   { room: "Room 13 (SM)", a: "Abu Shahimah Jamaluddin",       b: "" },
   { room: "Room 14 (SM)", a: "Azfa Syaihan Yusoff",           b: "" },
@@ -1756,10 +1790,23 @@ const ROOMS = [
   /* ---------------------------------------------------------- *
    * Agenda
    * ---------------------------------------------------------- */
-  // The only agenda item that carries a theme card: Day 2's dinner.
-  // Deliberately a plain function, not markup baked into AGENDA, so the
-  // themed card stays a one-line opt-in (`theme: "treasure"`) on whichever
+  // Two agenda items carry a theme card: Day 1 and Day 2's dinners.
+  // Deliberately plain functions, not markup baked into AGENDA, so a
+  // themed card stays a one-line opt-in (`theme: "..."`) on whichever
   // item needs it rather than a special case threaded through the renderer.
+  function pyjamaCard() {
+    return '<span class="pyjama">' +
+      '<svg class="pyjama__icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">' +
+        '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>' +
+      "</svg>" +
+      '<span class="pyjama__text">' +
+        '<span class="pyjama__kicker">Dress code</span>' +
+        '<span class="pyjama__title">Pyjama party</span>' +
+        '<span class="pyjama__body">Get dressed in your most comfortable pyjamas for dinner tonight, the comfier the better.</span>' +
+      "</span>" +
+    "</span>";
+  }
+
   function treasureCard() {
     return '<span class="treasure">' +
       '<span class="treasure__art">' +
@@ -1799,7 +1846,7 @@ const ROOMS = [
                      (it.confirm ? '<span class="chip">To confirm</span>' : "") +
                    "</span>" +
                    (it.note ? '<span class="slot__note">' + esc(it.note) + "</span>" : "") +
-                   (it.theme === "treasure" ? treasureCard() : "") +
+                   (it.theme === "treasure" ? treasureCard() : it.theme === "pyjama" ? pyjamaCard() : "") +
                  "</span>" +
                "</li>";
       }).join("");
@@ -1886,10 +1933,12 @@ const ROOMS = [
       '<div class="cluster">' +
         '<p class="cluster__name">' + esc(c.name) + "</p>" +
         c.items.map((i) =>
-          '<button type="button" class="check" data-id="' + esc(i.id) + '" aria-pressed="false">' +
+          '<button type="button" class="check' + (i.required ? " check--required" : "") + '" data-id="' + esc(i.id) + '" aria-pressed="false">' +
             '<span class="check__box" aria-hidden="true">' + tickSvg + "</span>" +
             '<span class="check__text">' +
-              '<span class="check__label">' + esc(i.label) + "</span>" +
+              '<span class="check__label">' + esc(i.label) +
+                (i.required ? '<span class="chip chip--required">Compulsory</span>' : "") +
+              "</span>" +
             "</span>" +
           "</button>"
         ).join("") +
