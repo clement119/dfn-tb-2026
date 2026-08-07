@@ -190,13 +190,12 @@ It lives at `/lost-treasure.html` and is **deliberately not linked from
 > search results and a pasted link will not unfurl, and that is the whole of the
 > protection. Do not put anything in it you would mind an attendee reading early.
 
-The deck currently holds all seven power cards the committee has finalised
-(one is a deliberate exception: an eighth upload turned out to be a
-byte-for-byte duplicate of "Sleight of Hand" and was left out rather than
-shown twice). Each card shows **only its artwork** on the poster, on the grid
-and enlarged in the tap-to-view lightbox alike; there is no name or power
-caption printed anywhere on the page, since the card itself already carries
-that wording.
+The deck currently holds all seven power cards the committee has finalised.
+One upload along the way was left out on purpose: a byte-for-byte duplicate
+of "Sleight of Hand" that would otherwise have shown the same card twice.
+Each card shows **only its artwork** on the poster, on the grid and enlarged
+in the tap-to-view lightbox alike; there is no name or power caption printed
+anywhere on the page, since the card itself already carries that wording.
 
 **To add another power card:** save the artwork as `img/cards/<name>.webp`
 (the existing seven are WebP q82 at the artwork's native 848x1264, roughly

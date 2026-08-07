@@ -63,7 +63,7 @@ jobs:
             img/cards/back.webp img/cards/observer.webp \
             img/cards/sleight-of-hand.webp img/cards/deflector.webp \
             img/cards/thief.webp img/cards/self-fulfilling-prophecy.webp \
-            img/cards/decider.webp; do
+            img/cards/decider.webp img/cards/dispeller.webp; do
             test -f "_site/$f" || { echo "::error::$f missing from the payload"; exit 1; }
           done
           echo "Publishing:"
