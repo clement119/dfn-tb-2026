@@ -178,6 +178,34 @@ promotes their venue, not a concern if this stays on an internal channel, but
 worth knowing before this goes anywhere more public than that, and worth
 replacing with the committee's own photos once those exist regardless.
 
+### The unlisted game poster
+
+`lost-treasure.html` is a second page: the rules and power cards for the Day 2
+themed dinner game, laid out as a single 16:9 slide for projecting or printing.
+It lives at `/lost-treasure.html` and is **deliberately not linked from
+`index.html`** so it is only reached by someone given the URL at dinner.
+
+> **It is unlisted, not secret.** This repository is public, so anyone browsing
+> it on GitHub can find the file and its artwork. `noindex` keeps it out of
+> search results and a pasted link will not unfurl, and that is the whole of the
+> protection. Do not put anything in it you would mind an attendee reading early.
+
+**To add the remaining power cards:** save the artwork as
+`img/cards/<name>.webp` (the existing five are WebP q82 at the artwork's native
+848x1264, roughly 150 to 240 KB each), then add one entry to the `CARDS` array
+in the page's data block:
+
+```js
+{ id: "seer", name: "The Seer", power: "Reveal",
+  art: "./img/cards/seer.webp",
+  alt: "Short description of the artwork, for screen readers.",
+  text: "The power wording, transcribed from the card." }
+```
+
+Nothing else changes: the grid is four across and takes a second row on its own.
+Add the new filename to the asset check in `.github/workflows/pages.yml` too, so
+a missing image fails the build instead of shipping a broken card.
+
 ---
 
 ## Hosting on GitHub Pages

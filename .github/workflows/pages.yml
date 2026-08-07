@@ -34,15 +34,20 @@ jobs:
           enablement: true
 
       - name: Assemble the published site
-        # Publish the page, its images and the hero video ONLY. README.md is
+        # Publish the pages, their images and the hero video ONLY. README.md is
         # deliberately left out: it lists unresolved blockers and internal
         # committee notes, and a static deploy would otherwise serve it at
         # /README.md.
+        #
+        # lost-treasure.html is the unlisted dinner-game poster. It is never
+        # linked from index.html, but it still has to be copied here or the
+        # URL 404s for whoever it is handed to.
         run: |
           set -euo pipefail
           rm -rf _site
           mkdir -p _site
           cp index.html _site/
+          cp lost-treasure.html _site/
           if [ -d img ]; then
             cp -r img _site/img
             rm -f _site/img/README.md
@@ -52,8 +57,14 @@ jobs:
             rm -f _site/media/README.md
           fi
           touch _site/.nojekyll
-          # Fail loudly rather than shipping a hero that 404s.
+          # Fail loudly rather than shipping a hero, or a game poster, that 404s.
           test -f _site/media/hero.mp4 || { echo "::error::media/hero.mp4 missing from the payload"; exit 1; }
+          for f in \
+            img/cards/back.webp img/cards/observer.webp \
+            img/cards/sleight-of-hand.webp img/cards/deflector.webp \
+            img/cards/thief.webp; do
+            test -f "_site/$f" || { echo "::error::$f missing from the payload"; exit 1; }
+          done
           echo "Publishing:"
           find _site -type f -exec du -h {} + | sort -k2
 
