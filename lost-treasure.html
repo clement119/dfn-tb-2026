@@ -219,12 +219,10 @@
      at four cards the columns are wide and the names are large, at seven they
      are narrow and the names shrink to match, instead of a fixed-size name
      breaking mid-word across a column that got smaller under it. */
-  .deck > li { flex: 1 1 0; min-width: 0; container-type: inline-size; }
+  .deck > li { flex: 1 1 0; min-width: 0; }
   .card {
+    display: block;
     width: 100%;
-    display: flex; flex-direction: column; align-items: stretch;
-    gap: 4cqw;
-    text-align: left;
     border-radius: 3cqw;
     transition: transform .3s var(--ease-out);
   }
@@ -243,20 +241,6 @@
     border-color: var(--gold);
     box-shadow: 0 6cqw 13cqw -4cqw rgba(0, 0, 0, .85);
   }
-  /* Last-resort safety for a name longer than anything anticipated: hyphenate
-     if the language allows it, break the word only if it genuinely cannot fit. */
-  .card__name, .card__power { overflow-wrap: break-word; hyphens: auto; }
-  .card__name {
-    font-family: var(--display);
-    font-weight: 600;
-    font-size: 8.4cqw;
-    line-height: 1.2;
-    letter-spacing: .03em;
-    text-transform: uppercase;
-    color: var(--gold);
-  }
-  .card__power { font-family: var(--mono); font-size: 7cqw; color: var(--parchment); }
-  .card__power b { color: var(--gold-quiet); font-weight: 400; }
 
   .deck__hint {
     margin-top: 1.4cqw;
@@ -273,7 +257,9 @@
      focus trap and Escape-to-close with nothing hand-rolled. Same
      pattern as the room-list modal on the joining-instructions page.
      The dialog fills the viewport and is transparent, so a click
-     anywhere off the panel lands on the dialog itself and closes. */
+     anywhere off the panel lands on the dialog itself and closes.
+     The panel holds only the enlarged art: no transcribed name, power
+     or rules text, just a bigger look at the card itself. */
   .lightbox {
     width: 100vw; max-width: 100vw;
     height: 100vh; max-height: 100vh;
@@ -285,50 +271,27 @@
   .lightbox[open] { display: grid; place-items: center; }
   .lightbox__panel {
     position: relative;   /* anchors the close button to the panel, not the viewport */
-    display: grid;
-    grid-template-columns: auto minmax(0, 22rem);
-    gap: clamp(1.25rem, 3vw, 2.25rem);
-    align-items: center;
-    max-width: min(54rem, calc(100vw - 2.5rem));
-    padding: clamp(1.1rem, 2.5vw, 1.9rem);
-    border-radius: 1.1rem;
-    border: 1px solid var(--edge);
-    background: linear-gradient(155deg, var(--ink-deep), var(--ink-mid) 70%, var(--ink-deep));
-    box-shadow: 0 2.5rem 6rem -1.5rem rgba(0, 0, 0, .85);
+    max-width: min(92vw, 30rem);
+    max-height: 90vh;
   }
   .lightbox__art {
-    height: min(74vh, 30rem); width: auto;
+    display: block;
+    width: auto; height: auto;
+    max-width: min(92vw, 30rem);
+    max-height: 90vh;
     aspect-ratio: var(--card-ratio);
     object-fit: contain;
-    border-radius: .6rem;
+    border-radius: 1rem;
     border: 1px solid var(--edge);
+    box-shadow: 0 2.5rem 6rem -1.5rem rgba(0, 0, 0, .85);
   }
-  .lightbox__text { display: grid; gap: .55rem; align-content: center; }
-  .lightbox__kicker {
-    font-family: var(--mono); font-size: .68rem;
-    letter-spacing: .2em; text-transform: uppercase;
-    color: var(--gold-quiet);
-  }
-  .lightbox__name {
-    font-family: var(--display); font-weight: 700;
-    font-size: clamp(1.3rem, 3.4vw, 1.85rem);
-    line-height: 1.15; letter-spacing: .04em;
-    text-transform: uppercase; color: var(--gold);
-  }
-  .lightbox__power {
-    font-family: var(--mono); font-size: .95rem;
-    color: var(--gold-bright);
-    padding-bottom: .55rem;
-    border-bottom: 1px solid var(--edge-soft);
-  }
-  .lightbox__body { font-size: .98rem; line-height: 1.6; color: var(--parchment); }
   .lightbox__close {
-    position: absolute; top: 1.1rem; right: 1.1rem;
+    position: absolute; top: .7rem; right: .7rem;
     display: grid; place-items: center;
     width: 2.4rem; height: 2.4rem;
     border-radius: 50%;
     color: var(--parchment);
-    background: rgba(6, 16, 26, .6);
+    background: rgba(6, 16, 26, .7);
     border: 1px solid var(--edge-soft);
     transition: color .2s var(--ease-out), border-color .2s var(--ease-out);
   }
@@ -388,15 +351,9 @@
   /* A row of seven is absurd on a phone, so the deck wraps two-up here. */
   .deck { flex-wrap: wrap; gap: 1.1rem .9rem; }
   .deck > li { flex: 0 0 calc(50% - .45rem); }
-  .card { gap: .45rem; }
   .card:hover, .card:focus-visible { transform: none; }
   .card__art { border-radius: .45rem; }
-  .card__name { font-size: .82rem; }
-  .card__power { font-size: .72rem; }
   .deck__hint { margin-top: 1.1rem; font-size: .68rem; }
-
-  .lightbox__panel { grid-template-columns: 1fr; max-width: calc(100vw - 1.5rem); }
-  .lightbox__art { height: auto; width: min(58vw, 15rem); margin-inline: auto; }
 }
 
 /* ============================================================ *
@@ -445,22 +402,16 @@
     <section class="powers" aria-labelledby="h-powers">
       <h2 class="col-head" id="h-powers">The powers</h2>
       <ul class="deck" data-deck></ul>
-      <p class="deck__hint" data-deck-hint>Tap a card to read it in full</p>
+      <p class="deck__hint" data-deck-hint>Tap a card to view it larger</p>
     </section>
   </div>
 </div>
 
-<dialog class="lightbox" data-lightbox aria-labelledby="lb-name">
+<dialog class="lightbox" data-lightbox aria-label="Card artwork">
   <div class="lightbox__panel">
     <!-- No src until a card is opened: src="" would make the browser fetch
          this page's own URL as an image. The script fills it in on open. -->
     <img class="lightbox__art" data-lb-art alt="" width="848" height="1264">
-    <div class="lightbox__text">
-      <p class="lightbox__kicker">Power card</p>
-      <h2 class="lightbox__name" id="lb-name" data-lb-name></h2>
-      <p class="lightbox__power" data-lb-power></p>
-      <p class="lightbox__body" data-lb-body></p>
-    </div>
     <button type="button" class="lightbox__close" data-lb-close aria-label="Close">
       <svg viewBox="0 0 256 256" fill="none" stroke="currentColor" stroke-width="20" stroke-linecap="round" aria-hidden="true">
         <line x1="200" y1="56" x2="56" y2="200"/>
@@ -473,13 +424,14 @@
 <script>
 /* ============ EDIT EVERYTHING BELOW ============ */
 
-/* The deck. To add one of the remaining power cards: drop its artwork in
-   img/cards/ and add one entry here. Nothing else needs to change, and the
-   grid absorbs a second row on its own.
+/* The deck. To add a power card: drop its artwork in img/cards/ and add one
+   entry here. Nothing else needs to change; the row narrows to fit it.
 
-   `text` is transcribed from the artwork on purpose: at slide size the
-   wording printed on a card is too small to read, and an image alone says
-   nothing to a screen reader. */
+   Only `art` and `alt` are ever displayed (`alt` doubles as each card's
+   accessible name, since it is the only content of its button). `name`,
+   `power` and `text` are not shown anywhere on the page; they are kept as
+   the canonical transcription of each card's wording, so a future edit
+   does not mean re-reading the artwork to know what it says. */
 const CARDS = [
   {
     id: "observer",
@@ -512,6 +464,22 @@ const CARDS = [
     art: "./img/cards/thief.webp",
     alt: "A masked figure in dark fatigues crouching over glowing runes, reaching out a hand.",
     text: "You are able to steal a person's card and make that power yours. Can only steal once."
+  },
+  {
+    id: "self-fulfilling-prophecy",
+    name: "Self-Fulfilling Prophecy",
+    power: "View & Compulsory Swap",
+    art: "./img/cards/self-fulfilling-prophecy.webp",
+    alt: "A woman with glowing eyes deflecting rainbow light into a stone circle of runes reading FATE, a cracked golden heart at its centre.",
+    text: "Choose a person's treasure. Examine it (without revealing it) and swap it with your own treasure or another person's treasure."
+  },
+  {
+    id: "decider",
+    name: "The Decider",
+    power: "View & Optional Swap",
+    art: "./img/cards/decider.webp",
+    alt: "A man weighing treasure and a compass on a golden scale beside an open chest, a globe and a map.",
+    text: "Choose a person's treasure. Examine it (without revealing it), and decide whether you want to swap it with your own treasure or another person's treasure."
   }
 ];
 
@@ -527,13 +495,17 @@ const CARDS = [
   const deck = $("[data-deck]");
   if (!deck) return;
 
+  // The card shows only its art: no name or power caption, on the grid or
+  // in the lightbox. `alt` carries the accessible description (and doubles
+  // as the button's accessible name, since it is the button's only content);
+  // `name`/`power`/`text` stay in the data above as the canonical
+  // transcription of each card, for editing reference, even though nothing
+  // currently renders them.
   deck.innerHTML = CARDS.map((c, i) =>
     "<li>" +
       '<button type="button" class="card" data-card="' + i + '" aria-haspopup="dialog">' +
         '<img class="card__art" src="' + esc(c.art) + '" alt="' + esc(c.alt) + '" ' +
              'loading="lazy" decoding="async" width="848" height="1264">' +
-        '<span class="card__name">' + esc(c.name) + "</span>" +
-        '<span class="card__power"><b>Power:</b> ' + esc(c.power) + "</span>" +
       "</button>" +
     "</li>"
   ).join("");
@@ -544,14 +516,11 @@ const CARDS = [
    * ---------------------------------------------------------- */
   const dialog = $("[data-lightbox]");
   const art    = $("[data-lb-art]");
-  const name   = $("[data-lb-name]");
-  const power  = $("[data-lb-power]");
-  const body   = $("[data-lb-body]");
   const close  = $("[data-lb-close]");
   if (!dialog || typeof dialog.showModal !== "function") {
-    // No <dialog> support: the cards stay as plain art with their name and
-    // power beside them, which is still the whole poster. Drop the hint that
-    // promises an interaction that would not happen.
+    // No <dialog> support: the cards stay as plain art, which is still the
+    // whole poster. Drop the hint that promises an interaction that would
+    // not happen.
     const hint = $("[data-deck-hint]");
     if (hint) hint.remove();
     return;
@@ -564,9 +533,7 @@ const CARDS = [
     if (!c) return;
     art.src = c.art;
     art.alt = c.alt;
-    name.textContent = c.name;
-    power.textContent = "Power: " + c.power;
-    body.textContent = c.text;
+    dialog.setAttribute("aria-label", c.name + " card artwork, full size");
     dialog.showModal();
   });
 

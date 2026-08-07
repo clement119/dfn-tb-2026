@@ -190,10 +190,18 @@ It lives at `/lost-treasure.html` and is **deliberately not linked from
 > search results and a pasted link will not unfurl, and that is the whole of the
 > protection. Do not put anything in it you would mind an attendee reading early.
 
-**To add the remaining power cards:** save the artwork as
-`img/cards/<name>.webp` (the existing five are WebP q82 at the artwork's native
-848x1264, roughly 150 to 240 KB each), then add one entry to the `CARDS` array
-in the page's data block:
+The deck currently holds all seven power cards the committee has finalised
+(one is a deliberate exception: an eighth upload turned out to be a
+byte-for-byte duplicate of "Sleight of Hand" and was left out rather than
+shown twice). Each card shows **only its artwork** on the poster, on the grid
+and enlarged in the tap-to-view lightbox alike; there is no name or power
+caption printed anywhere on the page, since the card itself already carries
+that wording.
+
+**To add another power card:** save the artwork as `img/cards/<name>.webp`
+(the existing seven are WebP q82 at the artwork's native 848x1264, roughly
+150 to 240 KB each), then add one entry to the `CARDS` array in the page's
+data block:
 
 ```js
 { id: "seer", name: "The Seer", power: "Reveal",
@@ -202,9 +210,15 @@ in the page's data block:
   text: "The power wording, transcribed from the card." }
 ```
 
-Nothing else changes: the grid is four across and takes a second row on its own.
-Add the new filename to the asset check in `.github/workflows/pages.yml` too, so
-a missing image fails the build instead of shipping a broken card.
+Only `art` and `alt` are ever displayed: `alt` is the card's accessible name
+as well as its screen-reader description, since the button around it has no
+other content. `name`, `power` and `text` are not shown anywhere; they exist
+so the wording on each card is on record without having to re-read the
+artwork later. Nothing else in the page changes when a card is added: the
+deck is one row that shares its width equally, so it narrows to fit rather
+than needing a new row. Add the new filename to the asset check in
+`.github/workflows/pages.yml` too, so a missing image fails the build instead
+of shipping a broken card.
 
 ---
 
